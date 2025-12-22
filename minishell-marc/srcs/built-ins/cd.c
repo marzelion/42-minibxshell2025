@@ -87,15 +87,27 @@ void	ft_cd_path(char *path)
 	}
 }
 
+/*char	*ft_home_path(char *home_path)
+{
+	home_path = ft_calloc(PATH_MAX, sizeof(char));
+	if (!home_path)
+	{
+		perror("cd");
+		exit(1);
+	}
+	home_path = getenv("HOME");
+	return (home_path);
+}*/
+
 void	ft_cd(char **argvs)
 {
 	//cd, cd ., cd .., cd path
 	//old pwd
 	//pwd
-	if (!argvs[2])
-		return ;
-	else if (ft_strncmp(argvs[2], ".", 2) == 0)
+	if (!argvs[1])
+		ft_cd_path(getenv("HOME"));
+	else if (ft_strncmp(argvs[1], ".", 2) == 0)
 		return ;
 	else
-		ft_cd_path(argvs[2]);
+		ft_cd_path(argvs[1]);
 }

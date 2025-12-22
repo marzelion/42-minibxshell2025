@@ -6,7 +6,7 @@
 /*   By: marcfer3 <marcfer3@student.42barcelona.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 21:20:31 by marcfer3          #+#    #+#             */
-/*   Updated: 2025/12/22 11:36:19 by marcfer3         ###   ########.fr       */
+/*   Updated: 2025/12/22 16:10:50 by marcfer3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int	main(int argc, char **argvs, char **envp)
 			else if (ft_strncmp(line_argvs[i], "envp", 5) == 0)
 				ft_env(envp);
 			else if (ft_strncmp(line_argvs[i], "cd", 3) == 0)
-				ft_cd(argvs);
+				ft_cd(line_argvs);
 			else if (ft_strncmp(line_argvs[i], "echo", 5) == 0)
 				ft_echo(argvs);
 			//ft_free_array(line_argvs);
