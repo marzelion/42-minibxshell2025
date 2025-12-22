@@ -8,11 +8,11 @@
 void handler_sigaction(int sig)
 {
 	(void)sig;
+	//write(1, &sig, 1);
 }
 
 /*
 	setup handler for crtl+\
-	TODO: Doesnt work
 */
 void init_sigaction()
 {
@@ -22,7 +22,7 @@ void init_sigaction()
 
 	s = 0;
 	p = (char **)&sa;
-	while (s < sizeof(sa))
+	while (s < sizeof(sigaction))
 	{
 		*p++ = 0;
 		s++;
@@ -62,8 +62,7 @@ int main(int argc, char **argv)
 	(void)argv;
 	(void)argc;
 
-	void init();
-
+	init();
 	while(1)
 	{
 		update();
