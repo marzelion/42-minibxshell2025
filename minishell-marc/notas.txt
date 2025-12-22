@@ -1,0 +1,115 @@
+Access:
+	Given a pathname and a flag, it checks whever the process has read, execute or write permissions
+	Returns 0 on success, -1 on failure
+
+Wait, waitpid, wait3, wait4:
+	Wait:
+		Simplest form, waits child process to terminate, returns pid of terminated child or -1 on error
+		Can't choose which child to wait for
+	waitpid:
+		Can wait for specific child process (using pid).
+		Returns pid of child that changed state, 0 if WNOHANG, or -1 on error
+	wait3:
+		More features than wait
+		Waits for any child
+		Returns resource usage info(CPU time, memory, etc) in rusage
+		Supports same options as waitpid
+	wait4:
+		Can wait for any specific child and get resource statistics
+		(combines waitpid() and wait3()) capabilities
+
+Signal, sigaction, sigemptyset, sigaddset:
+	A signal is a notification sent to a process to alert it of an event. (IPC, inter process communication)
+	Common signals like crtl+c, crtl+d, crtl+/
+
+	Signal:
+		Simplest signal handling function
+		Installs a signal handler for a specific signal (handler is a custom function)
+	Sigaction:
+		Modern, reliable way to handle signals
+		returns 0 on success, -1 on error
+	sigemptyset:
+		Initializes a signal set to be empty
+		Returns 0 on success, -1 on error
+		Used to prepare signal masks for sigaction() and others
+	sigaddset:
+		Adds specific signal to a signal set
+		Used after sigemptyset() to build custom signal masks
+		Returns 0 on success, -1 on error
+		Example: Block SIGINT and SIGTERM during critical errors
+	>>>EXAMPLE<<<<
+		struct sigaction sa;
+		sigset_t mask;
+
+		sigemptyset(&mask);	//initialize empty set
+		sigaddset(&mask, SIGTERM);	//Add SIGTERM to set
+
+		sa.sa_handler = my_handler;	//custom handler function
+		sa.sa_masl = mask;		//block SIGTERM during handler
+		sa.sa_flags = 0:
+		sigaction(SIGINT, &sa, NULL);	//install handler for SIGINT
+
+Kill:
+	Sends a signal to a process or process group, it doesn't necessarily kill it
+	Returns 0 on success, -1 on failure
+	kill(child_pid, SIGTERM);	//ask process to terminate gracefully
+	kill(child_pid, SIGKILL);	//force kill
+
+getcwd:
+	Gets the Current Working Directory your process is in:
+	Copies the absolute pathname of the current working directory into the buffer "buf"
+
+	char	buf[1024];
+	if (getcwd(buf, sizeof(buf)) != NULL)
+		printf("Current directory would be: %s", buf);
+	else
+		perror("getcwd");
+	
+chdir:
+	changes the current working directory of the calling process to the specified path
+	Returns 0 on success, -1 on error
+	
+stat, lstat, fstat:
+	stat:
+		gets info about a file by pathname
+		returns 0 on succcess, -1 on error
+		follows symbolic links
+	lstat
+		same as stat but does NOT follow symbolic links
+		if the pathname is a symlink, gets info about the link itself
+	fstat
+		gets file info using a file descriptor (already opened file)
+		returns 0 and -1
+	
+unlink:
+	removes a file from the filesystem
+	deteles directory entry and decrements link count
+	cannot remove directories, use rmdir() instead
+	returns 0 and -1
+
+opendir, readdir, closedir
+	opendir:
+		opens a directory stream for reading its contents
+		takes a directory path as parameter
+		returns a pointer to directory, null on error
+		must be closed with closedir() when done
+	readdir:
+		reads the next entry from an open directory stream
+		returns a pointer to a struct dirent or null
+		each call advances to the next entry
+	closedir:
+		needed to close dir after opening it
+
+isatty, ttyname, ttyslot
+	isatty:
+		checks if a file descriptor refers to a terminal (TTY)
+	ttyname:
+		gets the name/path of the terminal associated with a file descriptor
+		returns a string or null
+		returned string does not need to be freed
+	ttyslot:
+		obsolete bs
+
+isoctl:
+	performs special control operations on devices and file descriptors
+
