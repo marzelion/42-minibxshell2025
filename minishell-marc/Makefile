@@ -54,6 +54,9 @@ fclean: clean
 	@$(MAKE) -C $(LIBFT_DIR) fclean
 	@$(MAKE) -C $(FT_PRINTF_DIR) fclean
 
+leaker: CFLAGS += -g3 -fsanitize=address
+leaker: fclean $(NAME)
+
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean leaker re
