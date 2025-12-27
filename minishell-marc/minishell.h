@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marcfer3 <marcfer3@student.42barcelona.    +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 16:39:10 by marcfer3          #+#    #+#             */
-/*   Updated: 2025/12/22 10:59:45 by marcfer3         ###   ########.fr       */
+/*   Updated: 2025/12/27 14:21:31 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,6 @@ void	ft_echo(char **argvs);
 void	ft_free_array(char **array);
 void	ft_cd(char **argvs);
 void	ft_cd_path(char *path);
-
-
-
+char	*ft_current_directory_history_path(void);
 
 #endif
