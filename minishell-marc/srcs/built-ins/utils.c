@@ -68,5 +68,16 @@ char	*ft_current_directory_history_path(void)
 	else
 		history_path = ft_srtdup("./minishell_history");*/
 	//---------------------------------------------------------------------------------
+}
 
+void	ft_check_builtins(char **line_argvs, int i, char **envp)
+{
+	if (ft_strncmp(line_argvs[i], "pwd", 4) == 0)
+		ft_pwd();
+	else if (ft_strncmp(line_argvs[i], "env", 5) == 0)
+		ft_env(envp);
+	else if (ft_strncmp(line_argvs[i], "cd", 3) == 0)
+		ft_cd(line_argvs);
+	else if (ft_strncmp(line_argvs[i], "echo", 5) == 0)
+		ft_echo(line_argvs);
 }

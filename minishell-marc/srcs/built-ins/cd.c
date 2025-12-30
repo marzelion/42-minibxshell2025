@@ -21,33 +21,7 @@
 
 	ABSOLUTO->	Ruta completa desde la raiz del sistema
 			comienza con /
-			es una dirección completa
-*/
-/*char	*ft_delete_last_word(char *path)
-{
-	char	**pwd_words;
-	char	*new_pwd;
-	int		word_count;
-	int		i;
-
-	pwd_words = ft_split(path, "/");
-	if (pwd_words == NULL)
-		ft_exit(1);
-	word_count = 0;
-	while (pwd_words[word_count])
-		word_count++;
-	word_count--;
-	//need a funcion that concatenates strings till word_count
-	i = 0;
-	while (i < word_count)
-	{
-		new_pwd = ft_strjoin(pwd_words[i], pwd_words[i + 1]);
-		i++;
-	}
-	ft_free_array(pwd_words);
-	free(path);
-	return (new_pwd);
-}*/
+			es una dirección completa*/
 
 void	ft_cd_path(char *path)
 {
