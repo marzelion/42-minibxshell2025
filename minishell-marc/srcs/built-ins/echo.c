@@ -18,16 +18,13 @@ void	ft_echo(char **argvs)
 	int	flag;
 
 	flag = 0;
-	i = 1;
+	i = 0;
 	while (argvs[i])//1
 	{
 		if (ft_strncmp(argvs[i], "echo", 5) == 0)//1
 		{
 			if (!argvs[i + 1])
-			{		
 				ft_printf("\n");
-				ft_exit(0);
-			}
 			else if (ft_strncmp(argvs[i + 1], "-n", 2) == 0)//1+1=2
 				flag = 1;
 			break;
