@@ -10,6 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libft.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <stdio.h>
 /*
  * compile cc -g -I../../libft/ envmgr.c -L../../libft -lft
  * do not use envsize = sizeof(envp);
@@ -119,10 +124,112 @@ char *t_evmg_at(t_envmanager *p, char *key)
 	return NULL
 }
 */
+typedef struct s_envmanager
+{
+	int		pipeenv[2];
+	char	**_envp;
+	char	**(*find)(struct s_envmanager *p, char *key);
+}	t_envmanager;
 
-#include "libft.h"
+t_envmanager	*t_evm_dtor(t_envmanager *p)
+{
+	if (!p)
+		return (NULL);
+	if (p->_envp)
+		free(p->_envp);
+	p->_envp = NULL;
+	if (p->pipeenv[0] != -1)
+		close(p->pipeenv[0]);
+	if (p->pipeenv[1] != -1)
+		close(p->pipeenv[1]);
+	ft_memset(p->pipeenv, -1, 2 * sizeof(int));
+	return (p);
+}
 
-#include <stdlib.h>
+char	**t_evm_realloc(t_envmanager *p, char **envp, char *add)
+{
+	int		totalsize;
+	char	**tmp;
+
+	if (!p)
+		return (NULL);
+	totalsize = 0;
+	tmp = envp;
+	while (envp && *envp)
+		totalsize += ft_strlen(*(envp++)) * sizeof(char);
+	totalsize += (envp - tmp) + 1;
+	*envp = add;
+	if (add)
+		totalsize += ft_strlen(add);
+	envp = tmp;
+	if (write(p->pipeenv[1], envp, totalsize) != totalsize)
+		return (NULL);
+	tmp = malloc(totalsize);
+	if (!tmp)
+		return (NULL);
+	if (read(p->pipeenv[0], tmp, totalsize) != totalsize)
+		perror(NULL);
+	return (tmp);
+}
+
+char	**t_evm_find(t_envmanager *p, char *key)
+{
+	char	**tmp;
+
+	if (!p || !key)
+		return ((void *)0);
+	if (ft_strlen(key) == 0)
+		return ((void *)0);
+	tmp = p->_envp;
+	while (tmp && *tmp)
+	{
+		if (ft_strncmp(*tmp, key, ft_strlen(key) + 1) == '=')
+			return (tmp);
+		tmp++;
+	}
+	return (NULL);
+}
+
+/*
+ * 
+ * */
+t_envmanager	*t_evm_ctor(t_envmanager *p, char **envp, int pipeok)
+{
+	if (!p)
+		return (NULL);
+	p->_envp = NULL;
+	if (pipeok == -1)
+	{
+		ft_memset(p->pipeenv, -1, 2 * sizeof(int));
+		return (NULL);
+	}
+	p->_envp = t_evm_realloc(p, envp, NULL);
+	if ((errno != 0) || (p->_envp == NULL))
+	{
+		perror(NULL);
+		return (NULL);
+	}
+	p->find = t_evm_find;
+	return (p);
+}
+
+int	main(int argc, char **argv, char **envp)
+{
+	t_envmanager	envm_set;
+	
+	if(t_evm_ctor(&envm_set, envp, pipe(envm_set.pipeenv)) == NULL)
+		return(t_evm_dtor(&envm_set) == NULL);
+
+	char **displayval = envm_set.find(&envm_set, "DISPLAY");
+	displayval = envm_set.find(&envm_set, "SHELL");
+	displayval = envm_set.find(&envm_set, "NOTFOUND");
+
+	t_evm_dtor(&envm_set);
+	return (0);
+}
+
+
+
 int envref_main(int argc, char **argv,  char **envp)
 {
 	int envsize;
@@ -170,9 +277,8 @@ int envref_main(int argc, char **argv,  char **envp)
 	/*t_evm_dtor(&t_e);*/
 	return (0);
 }
-#include <unistd.h>
 
-int main(int argc, char **argv,  char **envp)
+int _env_pipe_main(int argc, char **argv,  char **envp)
 {
 	int	totalsize;
 	//int envsize;
