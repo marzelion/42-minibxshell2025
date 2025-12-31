@@ -129,6 +129,7 @@ typedef struct s_envmanager
 	int		pipeenv[2];
 	char	**_envp;
 	char	**(*find)(struct s_envmanager *p, char *key);
+	char	**(*create)(struct s_envmanager *p, char *kvpair);
 }	t_envmanager;
 
 t_envmanager	*t_evm_dtor(t_envmanager *p)
@@ -136,8 +137,7 @@ t_envmanager	*t_evm_dtor(t_envmanager *p)
 	if (!p)
 		return (NULL);
 	if (p->_envp)
-		free(p->_envp);
-	p->_envp = NULL;
+		ft_free((void *)p->_envp, (void **)&p->_envp);
 	if (p->pipeenv[0] != -1)
 		close(p->pipeenv[0]);
 	if (p->pipeenv[1] != -1)
@@ -145,36 +145,72 @@ t_envmanager	*t_evm_dtor(t_envmanager *p)
 	ft_memset(p->pipeenv, -1, 2 * sizeof(int));
 	return (p);
 }
-
-char	**t_evm_realloc(t_envmanager *p, char **envp, char *add)
+# define _W 		"pipex: warn:"
+char	**t_evm_realloc(t_envmanager *p, char **envp, char *add, size_t addz)
 {
-	int		totalsize;
-	char	**tmp;
+	size_t	crtfm;
+	adddz!!!!!//int		totalsize;//	char	**tmp;
 
 	if (!p)
 		return (NULL);
-	totalsize = 0;
+	totalsize = addz * sizeof(char);//	tmp = envp;
+	while (envp && *envp)
+	{
+		if (*envp != add)
+		{
+			crtfm = ft_putstr_fd((char *)(envp), p->pipeenv[1]);//crtfm = write(p->pipeenv[1], envp, ft_strlen(*envp));			//crtfm = ft_putstr_fd(*envp, p->pipeenv[1]);
+			if ((totalsize + ft_perror(crtfm, _W, crtfm + 1, 0))  == totalsize)
+				return (NULL);
+			totalsize += crtfm * sizeof(char);
+		}
+		envp++;
+	}
+	if (add && (addz > 0) && (write(p->pipeenv[1], add, addz) != addz))
+		return (NULL);//totalsize += (envp - tmp) + addz;	//envp = malloc(totalsize + (addz * sizeof(char)) + 1);
+	envp = ft_calloc(1, totalsize + 1);
+	if (envp && totalsize && (read(p->pipeenv[0], envp, totalsize) != -1))
+		perror(NULL);
+	if (envp && p->_envp)
+		ft_free((void *)p->_envp, (void **)&p->_envp);
+	return (envp);
+}
+	/*totalsize = 0;
 	tmp = envp;
 	while (envp && *envp)
+		if (envp != add)
 		totalsize += ft_strlen(*(envp++)) * sizeof(char);
-	totalsize += (envp - tmp) + 1;
-	*envp = add;
-	if (add)
-		totalsize += ft_strlen(add);
-	envp = tmp;
-	if (write(p->pipeenv[1], envp, totalsize) != totalsize)
+	if (write(p->pipeenv[1], tmp, totalsize) != totalsize)
 		return (NULL);
-	tmp = malloc(totalsize);
-	if (!tmp)
-		return (NULL);
-	if (read(p->pipeenv[0], tmp, totalsize) != totalsize)
-		perror(NULL);
-	return (tmp);
-}
+	if (add && (addz > 0) && (write(p->pipeenv[1], add, addz) != addz))
+		return (NULL);//totalsize += (envp - tmp) + addz;
+	totalsize += addz;
+	envp = malloc(totalsize);
+	if (envp)
+		if (read(p->pipeenv[0], envp, totalsize) != totalsize)
+			perror(NULL);
+	if (envp && p->_envp)
+		ft_free((void *)p->_envp, (void **)&p->_envp);
+	return (envp);
+	* */
+	/*if (write(p->pipeenv[1], tmp, totalsize) == totalsize)
+	{
+		if (add && (write(p->pipeenv[1], add, addz) != addz))
+			return (NULL);
+		totalsize += addz + 1 + write(p->pipeenv[1], NULL, 1);
+	}
+	envp = malloc(totalsize);
+	if (envp)
+		if (read(p->pipeenv[0], envp, totalsize) != totalsize)
+			perror(NULL);
+	if (envp && p->_envp)
+		ft_free((void *)p->_envp, (void **)&p->_envp);
+	return (envp);
+	* */
 
 char	**t_evm_find(t_envmanager *p, char *key)
 {
 	char	**tmp;
+	int		f;
 
 	if (!p || !key)
 		return ((void *)0);
@@ -183,13 +219,42 @@ char	**t_evm_find(t_envmanager *p, char *key)
 	tmp = p->_envp;
 	while (tmp && *tmp)
 	{
-		if (ft_strncmp(*tmp, key, ft_strlen(key) + 1) == '=')
+		f = ft_strncmp(*tmp, key, ft_strlen(key) + 1);
+		if ((f == -'=') || (f == '=') || (f == 0))
 			return (tmp);
 		tmp++;
 	}
 	return (NULL);
 }
 
+char	**t_evm_create(struct s_envmanager *p, char *kvpair)
+{
+	char *pval;
+	char **found;
+	char **tmp;
+	
+	if(!p || !kvpair || (kvpair && ft_strlen(kvpair) == 0))
+		return (NULL);
+	found = t_evm_find(p, kvpair);
+	if (found)
+	{
+		tmp = found;
+		//found = malloc(sizeof(char **));
+		//*found = ft_strdup(kvpair);
+		//free(*tmp);
+		//free(tmp);
+		found = p->_envp;
+	}
+	else
+		found = t_evm_realloc(p, p->_envp, kvpair, ft_strlen(kvpair));
+	if ((errno != 0) || (found == NULL))
+	{
+		perror(NULL);
+		return (NULL);
+	}
+	p->_envp = found;
+	return (found);
+}
 /*
  * 
  * */
@@ -203,13 +268,18 @@ t_envmanager	*t_evm_ctor(t_envmanager *p, char **envp, int pipeok)
 		ft_memset(p->pipeenv, -1, 2 * sizeof(int));
 		return (NULL);
 	}
-	p->_envp = t_evm_realloc(p, envp, NULL);
-	if ((errno != 0) || (p->_envp == NULL))
+	envp = t_evm_realloc(p, envp, NULL, 0);
+	if ((errno != 0) || (envp == NULL))
 	{
 		perror(NULL);
+		if(envp)
+			free(envp);
 		return (NULL);
 	}
+	if (envp)
+		p->_envp = envp;
 	p->find = t_evm_find;
+	p->create = t_evm_create;
 	return (p);
 }
 
@@ -217,12 +287,21 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_envmanager	envm_set;
 	
-	if(t_evm_ctor(&envm_set, envp, pipe(envm_set.pipeenv)) == NULL)
+	//if(t_evm_ctor(&envm_set, envp, pipe(envm_set.pipeenv)) == NULL)
+	if(t_evm_ctor(&envm_set, NULL, pipe(envm_set.pipeenv)) == NULL)
 		return(t_evm_dtor(&envm_set) == NULL);
 
 	char **displayval = envm_set.find(&envm_set, "DISPLAY");
 	displayval = envm_set.find(&envm_set, "SHELL");
 	displayval = envm_set.find(&envm_set, "NOTFOUND");
+
+	displayval = envm_set.create(&envm_set, NULL);
+	displayval = envm_set.create(&envm_set, "");
+	displayval = envm_set.create(&envm_set, "a");
+	displayval = envm_set.create(&envm_set, "b");
+	//displayval = envm_set.create(&envm_set, "a=1");
+//	displayval = envm_set.create(&envm_set, "a===");
+	//displayval = envm_set.create(&envm_set, "a");
 
 	t_evm_dtor(&envm_set);
 	return (0);
