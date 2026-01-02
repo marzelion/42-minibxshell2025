@@ -16,7 +16,8 @@ SRCS = srcs/built-ins/main.c \
 	srcs/built-ins/echo.c \
 	srcs/built-ins/exit.c \
 	srcs/built-ins/utils.c \
-	srcs/built-ins/cd.c
+	srcs/built-ins/cd.c \
+	srcs/signals/cntrl/signal.c
 
 #OBJECT RULES
 OBJ_DIR = obj/

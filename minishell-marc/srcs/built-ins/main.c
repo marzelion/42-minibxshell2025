@@ -2,11 +2,11 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
+/*                      	                              +:+ +:+         +:+     */
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 21:20:31 by marcfer3          #+#    #+#             */
-/*   Updated: 2025/12/29 20:36:59 by marvin           ###   ########.fr       */
+/*   Updated: 2025/12/30 17:16:03 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ void	ft_interactive_minishell(char **envp)
 	read_history(history_path);//carga los comandos anteriores, desde el archivo a la RAM
 	// -----------------------------------------------
 	//añadir sigaction aqui porq cambia como se maneja la señal
+	if (ft_change_signals() != 0)
+		return ;
 	//-------------------------------------------------
 	while (1)
 	{

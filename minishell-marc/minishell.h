@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 16:39:10 by marcfer3          #+#    #+#             */
-/*   Updated: 2025/12/30 16:45:44 by marvin           ###   ########.fr       */
+/*   Updated: 2025/12/30 17:14:11 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,5 +51,7 @@ void	ft_cd_path(char *path);
 char	*ft_current_directory_history_path(void);
 void	ft_check_builtins(char **line_argvs, int i, char **envp);
 void	ft_interactive_minishell(char **envp);
+int	ft_change_signals(void);
+
 
 #endif

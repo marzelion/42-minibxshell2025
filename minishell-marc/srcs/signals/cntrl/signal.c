@@ -10,18 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <signal.h>
-#include <unistd.h>//read()
-#include <stdio.h>//printf(), fflush()
-#include <string.h>//for strcmp()
-#include <stddef.h>// for size_t
-#include <stdlib.h>//exit
+#include "../../minishell.h"
 
-void handle_signal(int sig)
+/*void handle_signal(int sig)
 {
+	(void)sig;
 }
-
-/*
  * struct sigaction {
                void     (*sa_handler)(int);
                void     (*sa_sigaction)(int, siginfo_t *, void *);
@@ -29,15 +23,12 @@ void handle_signal(int sig)
                int        sa_flags;
                void     (*sa_restorer)(void);
            };
-
- *
- * */
-int main()
+int	ft_change_signals(void)
 {
 	size_t s;
 	char **p;
-	char	read_buffer[6];
-	ssize_t	bytes_read;
+	//char	read_buffer[6];
+	//ssize_t	bytes_read;
 	struct sigaction sa;
 
 	s = 0;
@@ -48,8 +39,8 @@ int main()
 		s++;	
 	}
 	sa.sa_handler = &handle_signal;
-	sigaction(SIGQUIT, &sa, (void *)0);
-
+	if (sigaction(SIGQUIT, &sa, (void *)0) == -1)
+		return (1);
 	while (1)
 	{
 		write(1, "> ", 2);
@@ -62,6 +53,15 @@ int main()
 			exit(0);
 		}
 	}
-	
+	return (0);
+}*/
+
+int	ft_change_signals(void)
+{
+	struct	sigaction sa;
+
+	ft_memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = SIG_IGN;//SIGN_IGN is builtin call to ignore signal
+	sigaction(SIGQUIT, &sa, NULL);
 	return (0);
 }
