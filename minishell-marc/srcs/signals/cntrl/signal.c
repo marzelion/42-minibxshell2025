@@ -12,11 +12,16 @@
 
 #include "../../minishell.h"
 
-/*void handle_signal(int sig)
+volatile sig_atomic_t global_signal_received = 0;
+
+void handle_signal(int sig)
 {
-	(void)sig;
+	global_signal_received = sig;//asigno la señal recibida a la variable global
+	if (sig == SIGINT)
+		write(1, "\n", 1);
 }
- * struct sigaction {
+
+/* * struct sigaction {
                void     (*sa_handler)(int);
                void     (*sa_sigaction)(int, siginfo_t *, void *);
                sigset_t   sa_mask;
@@ -56,12 +61,13 @@ int	ft_change_signals(void)
 	return (0);
 }*/
 
-int	ft_change_signals(void)
+int	ft_change_signals()
 {
-	struct	sigaction sa;
+	static struct	sigaction sa;//SI LA DECLARO EN EL MAIN SE DESTRUYE
 
-	ft_memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = SIG_IGN;//SIGN_IGN is builtin call to ignore signal
-	sigaction(SIGQUIT, &sa, NULL);
+	ft_memset(&sa, 0, sizeof(struct sigaction));
+	sa.sa_handler = &handle_signal;	// Asigna la funcion aqui
+	sigaction(SIGQUIT, &sa, NULL);	//señal control+barra
+	sigaction(SIGINT, &sa, NULL);	//señal control+c
 	return (0);
 }

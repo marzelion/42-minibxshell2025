@@ -72,6 +72,8 @@ char	*ft_current_directory_history_path(void)
 
 void	ft_check_builtins(char **line_argvs, int i, char **envp)
 {
+	if (!line_argvs || !*line_argvs)
+		return ;
 	if (ft_strncmp(line_argvs[i], "pwd", 4) == 0)
 		ft_pwd();
 	else if (ft_strncmp(line_argvs[i], "env", 5) == 0)
@@ -80,4 +82,7 @@ void	ft_check_builtins(char **line_argvs, int i, char **envp)
 		ft_cd(line_argvs);
 	else if (ft_strncmp(line_argvs[i], "echo", 5) == 0)
 		ft_echo(line_argvs);
+	/*else if (ft_strncmp(line_argvs[0], "exit", 5) == 0)
+		ft_exit(0);*/
+		//tengo que añadir algo para hacer free de todo aqui
 }

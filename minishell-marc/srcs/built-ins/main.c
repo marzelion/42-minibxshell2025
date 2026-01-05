@@ -12,6 +12,12 @@
 
 #include "../../minishell.h"
 
+/*void	ft_non_interactive_minishell(char **argvs, char **envp)
+{
+	//./minishell -c comando detalles
+
+}*/
+
 void	ft_interactive_minishell(char **envp)
 {
 	int		i;
@@ -30,11 +36,14 @@ void	ft_interactive_minishell(char **envp)
 	if (ft_change_signals() != 0)
 		return ;
 	//-------------------------------------------------
+	line_argvs = NULL;
 	while (1)
 	{
+		//pipex.run
+		/**/
 		line = readline("> ");///--------->>> USAR PS1
 		if (!line)//EOF, cntlr+D
-			break;
+			break ;
 		if (line)
 		{
 			/*
@@ -46,6 +55,12 @@ void	ft_interactive_minishell(char **envp)
 			*/
 			add_history(line);
 			line_argvs = ft_split(line, ' ');
+			if ((line_argvs[0]) && (ft_strncmp(line_argvs[0], "exit", 5) == 0))
+			{
+				ft_free_array(line_argvs);
+				free(line);
+				break ;
+			}
 			if (line_argvs)
 				ft_check_builtins(line_argvs, i, envp);
 			/*Si el comando no es un built-in, llamar al pipex
@@ -67,9 +82,8 @@ int	main(int argc, char **argvs, char **envp)
 {
 	(void)argc;
 	(void)argvs;
-	//if (ft_strcmp(argv[1], "-c", 3) == 0)
-	//	ft_non_interactive_minishell();
-	//else
+	/*if (ft_strcmp(argv[1], "-c", 3) == 0)
+		ft_non_interactive_minishell();*/
 	ft_interactive_minishell(envp);
 	return (0);
 }
