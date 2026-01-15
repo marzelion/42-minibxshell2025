@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marcfer3 <marcfer3@student.42barcelona.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 16:39:10 by marcfer3          #+#    #+#             */
-/*   Updated: 2026/01/12 11:40:33 by marvin           ###   ########.fr       */
+/*   Updated: 2026/01/16 00:23:00 by marcfer3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,9 @@ void	ft_cd(char **argvs);
 void	ft_cd_path(char *path);
 char	*ft_current_directory_history_path(void);
 void	ft_check_builtins(char **line_argvs, int i, char **envp);
-void	ft_interactive_minishell(char **envp, int argc);
+void	ft_interactive_minishell(char **envp, int argc, char *program_name);
 int		ft_change_signals();
-char	**ft_ignore_argv1_argv2(char **argvs, int argc);
-void	ft_non_interactive_minishell(char **argvs, char **envp, int argc);
+char	**ft_ignore_argv1_argv2(char **argvs, int argc, char *program_name);
+void	ft_non_interactive_minishell(char **argvs, char **envp, int argc, char *program_name);
 
 #endif

@@ -12,52 +12,54 @@
 
 #include "../../minishell.h"
 
-void	ft_non_interactive_minishell(char **argvs, char **envp, int argc)
+void	ft_non_interactive_minishell(char **argvs, char **envp, int argc, char *program_name)
 {
 	char	*line;
 	char	**argvs_line;
+	pid_t	pid;
 
-	/*
-	opcion 1: desde minishell escribo -c ->leo siguiente entrada
-	opcion 2: desde minishell escribo -c + comandos
-	opcion 3: ./minishell -c +comandos
-	*/
-	line = NULL;
-	argvs_line = NULL;
-	if (argvs == NULL)
+	pid = fork();
+	if (pid == -1)
+		ft_exit(1);
+	else if (pid == 0)
 	{
-		write(1, "> ", 2);
-		line = get_next_line(STDIN_FILENO);
-		if (!line)
-			return ;
-		argvs_line = ft_split(line, ' ');
-		if (!argvs_line)
+		line = NULL;
+		argvs_line = NULL;
+		if (argvs == NULL)
 		{
-			ft_printf("error from ft_split\n");
-			ft_exit(1);
+			write(1, "> ", 2);
+			line = get_next_line(STDIN_FILENO);
+			if (!line)
+				return ;
+			argvs_line = ft_split(line, ' ');
+			if (!argvs_line)
+			{
+				ft_printf("error from ft_split\n");
+				ft_exit(1);
+			}
 		}
-	}
-	else if (argvs)
-	{
-		//problema-> los argvs recibidos en el momento de ejecutar el programa van a tener argv0 y argv1 que no quiero para mi argvs_line
-		//solucion: llamar una funcion que mira el argv0 y argv1 para ignorarlos a la hora de crear el argvs_line
-		argvs_line = ft_ignore_argv1_argv2(argvs, argc);
-		if (!argvs_line)
+		else if (argvs)
+		{
+			argvs_line = ft_ignore_argv1_argv2(argvs, argc, program_name);
+			if (!argvs_line)
+				ft_exit(0);
+		}
+		if (argvs_line[0] && (ft_strncmp(argvs_line[0], "exit", 5) == 0))
+		{
+			ft_free_array(argvs_line);
 			ft_exit(0);
-	}
-	if (argvs_line[0] && (ft_strncmp(argvs_line[0], "exit", 5) == 0))
-	{
+		}
+		else if (argvs_line)
+			ft_check_builtins(argvs_line, 0, envp);
 		ft_free_array(argvs_line);
+		free(line);
 		ft_exit(0);
 	}
-	else if (argvs_line)
-		ft_check_builtins(argvs_line, 0, envp);
-	ft_free_array(argvs_line);
-	free(line);
-	//./minishell -c comando detalles
+	else
+		wait(NULL);
 }
 
-void	ft_interactive_minishell(char **envp, int argc)
+void	ft_interactive_minishell(char **envp, int argc, char *program_name)
 {
 	int		i;
 	char	*line;
@@ -100,38 +102,48 @@ void	ft_interactive_minishell(char **envp, int argc)
 				free(line);
 				break ;
 			}
-			if (ft_strncmp(line_argvs[0], "-c", 3) == 0)
-				ft_non_interactive_minishell(line_argvs, envp, argc);
+			if (ft_strncmp(line_argvs[0], program_name, ft_strlen(program_name) + 1) == 0)
+				ft_non_interactive_minishell(line_argvs, envp, argc, program_name);
 			if (line_argvs)
 				ft_check_builtins(line_argvs, i, envp);
-			/*Si el comando no es un built-in, llamar al pipex
-			Si el comando ES un built-in, llamar al pipex con el execve de ./minishell 'built-in'
-			siempre se hará un fork+execve*/
 			ft_free_array(line_argvs);
-			//------------------------
-			//variable global != 0 --> hacer algo
-			//-------------------------
 		}
 		free(line);
 	}
 	write_history(history_path);
 	clear_history();
 	free(history_path);
+	free(program_name);
+}
+
+char	*ft_program_name(char *program_name, char **argvs)
+{
+	program_name = ft_strdup(argvs[0]);
+	if (!program_name)
+		ft_exit(1);
+	return (program_name);
 }
 
 int	main(int argc, char **argvs, char **envp)
 {
-	if (argvs[1] && ft_strncmp(argvs[1], "-c", 3) == 0)
+	char	*program_name;
+
+	program_name = NULL;
+	program_name = ft_program_name(program_name, argvs);
+	if (argvs[1])
 	{
-		ft_non_interactive_minishell(argvs, envp, argc);
+		ft_non_interactive_minishell(argvs, envp, argc, program_name);
 		ft_exit(0);
 	}
 	else if (!argvs[1])
 	{
 		if (isatty(STDIN_FILENO))
-			ft_interactive_minishell(envp, argc);
+			ft_interactive_minishell(envp, argc, program_name);
 		else
-			ft_non_interactive_minishell(argvs, envp, argc);
+			ft_non_interactive_minishell(argvs, envp, argc, program_name);
 	}
 	return (0);
 }
+
+/*
+*/
