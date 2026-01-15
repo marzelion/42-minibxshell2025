@@ -17,8 +17,10 @@ SRCS = srcs/built-ins/main.c \
 	srcs/built-ins/exit.c \
 	srcs/built-ins/utils.c \
 	srcs/built-ins/cd.c \
-	srcs/signals/cntrl/signal.c
-
+	srcs/signals/cntrl/signal.c \
+	srcs/built-ins/parse_arg1_arg2.c \
+	libraries/gnl/get_next_line.c \
+	libraries/gnl/get_next_line_utils.c
 #OBJECT RULES
 OBJ_DIR = obj/
 OBJS = $(SRCS:$(SRCS_DIR)%.c=$(OBJ_DIR)%.o)
@@ -28,7 +30,7 @@ FT_PRINTF_DIR = libraries/ft_printf
 LIBFT = $(LIBFT_DIR)/libft.a
 FT_PRINTF = $(FT_PRINTF_DIR)/libftprintf.a
 #INCLUDES
-INCLUDES = -I. -I$(LIBFT_DIR) -I$(FT_PRINTF_DIR) -Isrcs/built-ins
+INCLUDES = -I. -I$(LIBFT_DIR) -I$(FT_PRINTF_DIR)  -Ilibraries/gnl -Isrcs/built-ins
 #rules
 all: $(NAME)
 

@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marcfer3 <marcfer3@student.42barcelona.    +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 16:39:10 by marcfer3          #+#    #+#             */
-/*   Updated: 2026/01/03 16:35:07 by marcfer3         ###   ########.fr       */
+/*   Updated: 2026/01/12 11:40:33 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
-# define MINSHELL_H
+# define MINISHELL_H
 
 /* Standard C Library */
 #include <stdio.h>      /* printf, perror */
@@ -38,6 +38,7 @@
 //old libraries
 #include "libraries/ft_printf/ft_printf.h"
 #include "libraries/full_libft/libft.h"
+#include "libraries/gnl/get_next_line.h"
 
 extern volatile sig_atomic_t global_signal_received;
 /*
@@ -52,14 +53,16 @@ sig_atomic_t -> tipo de dato entero especial definido en signal.h
 void	ft_exit(int code);
 void	ft_pwd(void);
 void	ft_env(char **envs_array);
-int	main(int argc, char **argv, char **envp);
+int		main(int argc, char **argv, char **envp);
 void	ft_echo(char **argvs);
 void	ft_free_array(char **array);
 void	ft_cd(char **argvs);
 void	ft_cd_path(char *path);
 char	*ft_current_directory_history_path(void);
 void	ft_check_builtins(char **line_argvs, int i, char **envp);
-void	ft_interactive_minishell(char **envp);
-int	ft_change_signals();
+void	ft_interactive_minishell(char **envp, int argc);
+int		ft_change_signals();
+char	**ft_ignore_argv1_argv2(char **argvs, int argc);
+void	ft_non_interactive_minishell(char **argvs, char **envp, int argc);
 
 #endif
