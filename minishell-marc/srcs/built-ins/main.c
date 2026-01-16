@@ -12,10 +12,24 @@
 
 #include "../../minishell.h"
 
+void	debug_string(char *msg, char **string)
+{
+	int	i = 0;
+
+	if (msg)
+		ft_printf("%s", msg);
+	while (string[i])
+	{
+		ft_printf("%s\n", string[i]);
+		i++;
+	}
+}
+
 void	ft_non_interactive_minishell(char **argvs, char **envp, int argc, char *program_name)
 {
 	char	*line;
 	char	**argvs_line;
+	char	*tmp;
 	pid_t	pid;
 
 	pid = fork();
@@ -25,12 +39,15 @@ void	ft_non_interactive_minishell(char **argvs, char **envp, int argc, char *pro
 	{
 		line = NULL;
 		argvs_line = NULL;
-		if (argvs == NULL)
+		if (argvs[1] == NULL)
 		{
-			write(1, "> ", 2);
+			ft_printf("minishell no interactivo > ");
 			line = get_next_line(STDIN_FILENO);
 			if (!line)
 				return ;
+			tmp = line;
+			line = ft_strtrim(line, "\n");
+			free(tmp);
 			argvs_line = ft_split(line, ' ');
 			if (!argvs_line)
 			{
@@ -38,7 +55,7 @@ void	ft_non_interactive_minishell(char **argvs, char **envp, int argc, char *pro
 				ft_exit(1);
 			}
 		}
-		else if (argvs)
+		else if (argvs && argvs[1])
 		{
 			argvs_line = ft_ignore_argv1_argv2(argvs, argc, program_name);
 			if (!argvs_line)
