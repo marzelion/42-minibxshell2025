@@ -100,17 +100,11 @@ void	ft_interactive_minishell(char **envp, int argc, char *program_name)
 		//pipex.run
 		/**/
 		line = readline("> ");///--------->>> USAR PS1
+
 		if (!line)//EOF, cntlr+D
 			break ;
-		if (line)
+		if (line && line[0] != '\0')
 		{
-			/*
-			para los built-ins, pasarle argc, argv, envp
-			*/
-
-			/*
-			man execve -> exemplo de codigo con scripts
-			*/
 			add_history(line);
 			line_argvs = ft_split(line, ' ');
 			if ((line_argvs[0]) && (ft_strncmp(line_argvs[0], "exit", 5) == 0))
