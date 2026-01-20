@@ -160,9 +160,7 @@ void	debug_splitstr(char **argv_split)
 int	main(int argc, char **argv, char **envp)
 {
 	t_pipex	pipex;
-	char	*p;
 
-	p = NULL;
 	if (!t_pipex_ctor(&pipex))
 		return (t_pipex_dtor(&pipex));
 	pipex.argc = argc;
