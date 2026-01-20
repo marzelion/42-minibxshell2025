@@ -191,7 +191,7 @@ int	t_procx_exec(t_procx *p, char *cmd, t_pipex *ppx)
 		p->pipex_error = EKEYEXPIRED;
 	if ((p->pipex_error == ENOENT) && (p->argv[0][0] != '/'))
 		p->pipex_error = errno;
-	return (0);
+	return (result - result);
 }
 
 /*
