@@ -18,6 +18,7 @@ typedef unsigned long	t_size_t;
 */
 typedef size_t				t_size_t;
 typedef unsigned long long	t_ulonglong;
+typedef void				**t_vpp;
 /*
  * # ifdef _FTBONUS
 */
@@ -29,16 +30,18 @@ typedef struct s_list
 /*
 # endif
 */
-void		*ft_free(void **pp, void *p);
+void		*ft_free(void *p, t_vpp pp);
 int			ft_perror(int retval, const char *s, int ignore, int succ);
 char		*newstr(char **buffer, size_t bufsize);
 # define FT_NEWSTR newstr
 
 int			ft_isalpha(int c);
+int			ft_isblank(int c);
 int			ft_isdigit(int c);
 int			ft_isalnum(int c);
 int			ft_isascii(int c);
 int			ft_isprint(int c);
+int			ft_isspacbk(int c);
 int			ft_toupper(int c);
 int			ft_tolower(int c);
 int			ft_memcmp(const void *s1, const void *s2, size_t n);
@@ -87,6 +90,9 @@ new string, which is the result of concatenating
 ’s1’ and ’s2w
  * */
 char		*ft_strjoin(char const *s1, char const *s2);
+
+# define FT_JOIN ft_strjoin
+
 /*
 s1: The string to be trimmed.
 set: The string containing the set of characters
@@ -108,7 +114,7 @@ int			ft_countfilledsubstr(const char *s, char c);
 
 char		**ft_strsplit_release(char ***arr);
 
-char		**ft_split(char const *s, char c);
+char		**ft_split(char const *start, char c);
 
 char		*ft_itoa(int n);
 

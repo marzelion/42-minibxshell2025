@@ -16,6 +16,8 @@ char *ft_strjoin(char const *s1, char const *s2);
 Allocates memory (using malloc(3)) and returns a
 new string, which is the result of concatenating
 ’s1’ and ’s2’.
+not apply if (!s1 || !s2)
+		return ((void *)0);
  * */
 #include "libft.h"
 #include <stdlib.h>
@@ -26,8 +28,6 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	t_size_t	s1len;
 	t_size_t	s2len;
 
-	if (!s1 || !s2)
-		return ((void *)0);
 	s1len = 0;
 	if (s1)
 		s1len = ft_strlen(s1);

@@ -232,14 +232,14 @@ int	t_pipex_redirect_parent(t_pipex *ppx, t_procx *p)
 	{
 		if (ft_strncmp(ppx->lim, p->cmd, ft_strlen(ppx->lim) + 1) == -('\n'))
 		{
-			ft_free((void *)p->cmd, &p->cmd);
+			ft_free((void *)p->cmd, (void **)&p->cmd);
 			continue ;
 		}
 		else
 		{
 			crtfm = ft_putstr_fd(p->cmd, ppx->ppfd[1]);
 			p->wc += ft_perror(crtfm, _W, crtfm + 1, 0) - 1;
-			ft_free((void *)p->cmd, &p->cmd);
+			ft_free((void *)p->cmd, (void **)&p->cmd);
 		}
 		p->cmd = get_next_line(ft_putchar_fd(126, 1) - 1);
 	}
@@ -247,7 +247,7 @@ int	t_pipex_redirect_parent(t_pipex *ppx, t_procx *p)
 		ft_perror(read(ppx->ppfd[0], p->cmd, p->wc), _W, -1, 0);
 	if (p->wc && p->cmd && *p->cmd && ft_perror(pipe(ppx->ppfd), _W, 1, 0))
 		ft_perror(write(ppx->infilefd, p->cmd, p->wc), _W, 1, 0);
-	return (ft_free((void *)p->cmd, &p->cmd) != NULL);
+	return (ft_free((void *)p->cmd, (void **)&p->cmd) != NULL);
 }
 
 /* 251205!!! Aparently potential leak!!

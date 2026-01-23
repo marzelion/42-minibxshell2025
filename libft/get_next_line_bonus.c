@@ -146,7 +146,7 @@ char	*get_next_line(int fd)
 	if (!tmp)
 		return (release_buffer(NULL, (void **)&buffer[fd]));
 	buffer[fd] = get_keep(buffer[fd]);
-	if (buffer[fd])
+	if (*buffer[fd] == '\0')
 		release_buffer(NULL, (void **)&buffer[fd]);
 	return (tmp);
 }
