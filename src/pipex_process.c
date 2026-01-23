@@ -187,12 +187,11 @@ int	t_procx_exec(t_procx *p, char *cmd, t_pipex *ppx)
 		result = execve(cmd, p->argv, ppx->envp);
 	p->pipex_error = errno;
 	perror(p->argv[1]);
-	result = 0;
 	if ((p->pipex_error == ENOENT) && (p->cmd))
 		p->pipex_error = EKEYEXPIRED;
 	if ((p->pipex_error == ENOENT) && (p->argv[0][0] != '/'))
 		p->pipex_error = errno;
-	return (result);
+	return (result - result);
 }
 
 /*
