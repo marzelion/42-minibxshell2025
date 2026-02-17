@@ -51,6 +51,9 @@ size_t		ft_strlen(const char *s);
 char		*ft_strchr(const char *s, int c);
 char		*ft_strrchr(const char *s, int c);
 void		*ft_memset(void *s, int c, size_t n);
+
+# define FT_MSET ft_memset
+
 void		ft_bzero(void *s, size_t n);
 int			ft_strncmp(const char *s1, const char *s2, size_t n);
 void		*ft_memchr(const void *s, int c, size_t n);
@@ -107,12 +110,23 @@ The array of new strings resulting from the split.
 NULL if the allocation fails.
 malloc, free
  */
+void		ft_splititeri(char **a, void (*f)(unsigned int, char **));
+
 size_t		ft_strsplit_size(char **arridx);
+
 int			ft_countfilledsubstr(const char *s, char c);
 
 # define FT_SPLTCNT ft_countfilledsubstr
 
+int			ft_countfilledsubstr_l(const char *s, char c, size_t n);
+
+int			ft_countfilledsubstr_n(const char *s, char c, size_t n);
+
 char		**ft_strsplit_release(char ***arr);
+
+char		**ft_split_l(char const *s, char c[2], size_t n);
+
+char		**ft_split_n(char const *s, char c, size_t n);
 
 char		**ft_split(char const *start, char c);
 

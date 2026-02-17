@@ -106,29 +106,28 @@ int	ft_countfilledsubstr(const char *s, char c)
 	if (!s)
 		return (NULL);
  * */
-char	**ft_split(char const *start, char c)
+char	**ft_split(char const *s, char c)
 {
 	int			num_substrings;
 	char		**result;
+	char const	*start;
 	char const	*end;
 	int			i;
 
-	num_substrings = ft_countfilledsubstr(start, c);
+	num_substrings = ft_countfilledsubstr(s, c);
 	result = malloc(sizeof(char *) * (num_substrings + 1));
 	if (!result)
 		return (NULL);
-	end = start;
+	start = s;
+	end = s;
 	i = 0;
-	while ((*end) || (num_substrings > 0))
+	while (*end)
 	{
 		end = ft_strchr(start, c);
 		if (end == NULL)
-			end = start + ft_strlen(start);
+			end = s + ft_strlen(s);
 		if (end > start)
-		{
 			result[i++] = ft_strndupn2(start, end - start + 1);
-			num_substrings--;
-		}
 		start = end + 1;
 	}
 	result[i] = NULL;

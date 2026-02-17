@@ -1,8 +1,16 @@
 
-SRCS := src/pipex.c src/pipex_main.c \
-		src/pipex_utils.c src/pipex_process.c
+SRCS := src/e_envmgr.c src/e_envmgr_crud.c \
+		src/u_util_pipe.c \
+		src/m_minishell.c \
+		src/builtin/pwd.c
 
-H_INCLUDES :=  include/pipex.h
+SRCS_PIPEX := src/pipex/pipex.c src/pipex/pipex_main.c \
+		src/pipex/pipex_utils.c src/pipex/pipex_process.c
+
+SRCS += $(SRCS_PIPEX)
+
+H_INCLUDES :=  include/mx_utils.h include/pipex.h \
+				include/minishellx.h
 
 SRCS_BONUS := $(SRCS) src/main.c
 
@@ -48,9 +56,12 @@ LIBFT:=libft/libft.a
 LIBFT_DEBUG:=libft/libft_d.a
 LIBPRINTF:=libftprintf/libftprintf.a
 LIBPRINTF_DEBUG:=libftprintf/libftprintf_d.a
-NAME:=pipex
-NAME_DEBUG:=dpipex
-NAME_DEBUGPRINT:=pipex_pd
+NAME:=minishell
+NAME_DEBUG:=dminishell
+NAME_DEBUGPRINT:=minishell_pd
+PIPEX_NAME:=pipex
+PIPEX_NAME_DEBUG:=dpipex
+PIPEX_NAME_DEBUGPRINT:=pipex_pd
 
 all: $(NAME)
 
@@ -68,20 +79,30 @@ $(LIBPRINTF) :
 	make -C libftprintf
 $(LIBPRINTF_DEBUG) :
 	make -C libftprintf debug
-
-$(NAME_DEBUGPRINT): $(LIBFT) $(LIBPRINTF_DEBUG) $(H_INCLUDES) $(OBJS)
+$(PIPEX_NAME_DEBUGPRINT): $(LIBFT) $(LIBPRINTF_DEBUG) $(H_INCLUDES) $(OBJS)
 	cc $(INCLUDE) -Wall -Wextra -Werror $(OBJS) \
 	-Llibftprintf -lftprintf_d -Llibft -lft \
-	 -o $(NAME_DEBUGPRINT)
-	
+	 -o $(PIPEX_NAME_DEBUGPRINT)
+$(PIPEX_NAME_DEBUG): $(LIBFT) $(LIBPRINTF_DEBUG) $(H_INCLUDES) $(OBJS)
+	cc $(INCLUDE) -Wall -Wextra -Werror $(OBJS) \
+	-Llibftprintf -lftprintf_d -Llibft -lft \
+	 -o $(PIPEX_NAME_DEBUG)
+$(PIPEX_NAME): $(LIBFT) $(LIBPRINTF_DEBUG) $(H_INCLUDES) $(OBJS)
+	cc $(INCLUDE) -Wall -Wextra -Werror $(OBJS) \
+	-Llibftprintf -lftprintf_d -Llibft -lft \
+	 -o $(PIPEX_NAME)	 
+$(NAME_DEBUGPRINT): $(LIBFT) $(LIBPRINTF_DEBUG) $(H_INCLUDES) $(OBJS)
+	cc $(INCLUDE) -Wall -Wextra -Werror $(OBJS) \
+	-Llibftprintf -lftprintf_d -Llibft -lft -lreadline \
+	 -o $(NAME_DEBUGPRINT)	
 $(NAME): $(LIBFT) $(LIBPRINTF) $(H_INCLUDES) $(OBJS) Makefile
 	cc $(INCLUDE) -Wall -Wextra -Werror $(OBJS) \
-	-Llibftprintf -lftprintf -Llibft -lft \
+	-Llibftprintf -lftprintf -Llibft -lft -lreadline \
 	-o $(NAME)
 
 $(NAME_DEBUG): $(LIBFT_DEBUG) $(LIBPRINTF_DEBUG) $(H_INCLUDES) $(OBJS)
 	cc $(INCLUDE) -Wall -Wextra -Werror $(OBJS) \
-	-Llibftprintf -lftprintf_d -Llibft -lft_d \
+	-Llibftprintf -lftprintf_d -Llibft -lft_d -lreadline \
 	-o $(NAME_DEBUG)
 
 #added MMD and -include *.d wathcout not use $^!!
@@ -102,10 +123,12 @@ backup:
 	fi
 	
 clean: backup
+	rm -f $(PIPEX_NAME) $(PIPEX_NAME_DEBUG) $(PIPEX_NAME_DEBUG_PRINT)
 	rm -f $(NAME) $(NAME_DEBUG) $(NAME_DEBUGPRINT) $(OBJS) $(DEPS)
 	
 fclean: clean
 	rm -f $(NAME).old $(NAME_DEBUG).old $(NAME_DEBUGPRINT).old
+	rm -f $(PIPEX_NAME) $(PIPEX_NAME_DEBUG) $(PIPEX_NAME_DEBUG_PRINT)
 	rm -f $(NAME) $(NAME_DEBUG) $(NAME_DEBUGPRINT) $(OBJS) $(DEPS)
 	rm -f $(NAME) $(NAME_DEBUG) $(NAME_DEBUGPRINT) $(OBJS) $(DEPS)
 	make -C libftprintf fclean
