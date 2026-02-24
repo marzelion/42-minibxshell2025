@@ -53,7 +53,11 @@ char	**t_evm_find(t_envmanager *p, char *key, char **val)
 		if ((f == -'=') || (f == '=') || (f == 0))
 		{
 			if (val)
+			{
 				*val = ft_strchr(*tmp, '=');
+				if (**val == '=')
+					(*val)++;
+			}
 			return (tmp);
 		}
 		tmp++;

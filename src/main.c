@@ -99,36 +99,34 @@ void t_mini_rnl(t_mini *pm)
 	return (0);
 }*/
 
-int prs(t_mini *pm, int argc, char **argv)
+int parse(t_mini *pm, int argc, char **argv)
 {
 	if (!pm || (argc == 0) || !argv)
 		return (-1);
-	pm->interactive = argc == 1;
+	pm->interactive = 1;
+	return (errno);
+}
+	/*pm->interactive = argc == 1;*/
 	/*if (!pm->envm.find("PWD") || !pm->envm.find("PS1") || !pm->envm.find("PS2"))
-		return(t_mini_dtor(pm) != NULL);*/
-	return (errno);
-}
-/*
-int ft_shlvl(t_mini x)
-{
-	(void)x;
-	int		val;
-	char	*kv;
-	
-	kv = x.envm.v(&x.envm, "SHLVL");
-	if (!kv)
-		val = 0;
-	else if (ft_atoi_val(kv, &val) == -1))
-		val = 0;
-	kv = ft_itoa(val);
-	if (!kv)
-		return(errno);
-		lllllllllllllllllllllll
-	x.envm.create(&x.envm, FT_JOIN("SHLVL=", kv));
-* *
-	return (errno);
-}
+		return(t_mini_dtor(pm) != NULL);
 */
+
+char *prompt(t_mini *p, char *level)
+{
+	char	*val;
+	
+	if (!p || !level || (level && (*level == '\0')))
+		return (NULL);
+	if (p->evm.find(&p->evm, level, &val))
+	{
+		if (*val != '\0')
+			return (val);
+		else
+			return (val);
+	}
+	return ("Minishell> ");
+}
+
 /*
  * p->batchmode 
  *  >1 ignore multiple construction, DO NOT DESTROY!!
@@ -137,10 +135,30 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_mini	x;
 	int		e;
+	char	*line;
 
-	e = prs(t_m_ctor(&x, isatty(0), envp, pipe((int *)x.evm.pd)), argc, argv);
+	x.batchmode = isatty(0);
+	e = parse(t_m_ctor(&x, isatty(0), envp, pipe((int *)x.evm.pd)), argc, argv);
 	if (e == 0)
 	{
+		while(1)
+		{
+			if (x.batchmode != 0)
+				line = readline("Minishell> ");
+			else
+				line = get_next_line(0);
+			if (!line)
+				break ;
+			//sanear
+	//> echo marc
+			//piipex
+				//pipex_minishell -> builtins o no
+					//execv
+			ft_printf("%s", line);
+			if (x.batchmode != 0)
+				ft_putchar_fd('\n', 1);
+			free(line);
+		}
 	}
 	return (t_mini_dtor(&x));
 }

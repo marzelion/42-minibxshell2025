@@ -107,7 +107,7 @@ $(NAME_DEBUG): $(LIBFT_DEBUG) $(LIBPRINTF_DEBUG) $(H_INCLUDES) $(OBJS)
 
 #added MMD and -include *.d wathcout not use $^!!
 %.o: %.c
-	cc $(INCLUDE) -Wall -Wextra -Werror -c -MMD $< -o $@
+	cc -g $(INCLUDE) -Wall -Wextra -Werror -c -MMD $< -o $@
 
 %.h:
 

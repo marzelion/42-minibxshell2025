@@ -24,7 +24,7 @@ int ft_pipeclose(int pd[3])
 	if (pd[2] == -1)
 		return (1);
 	t = pd[0];
-	if (close(pd[0]) + close(pd[1]) || ft_memset(pd, 0, 2))
+	if (close(pd[0]) + close(pd[1]) || !ft_memset(pd, 0, 2 * sizeof(int)))
 	{
 		ft_putnbr_fd(t, 2);
 		perror(" Closing pipe:");

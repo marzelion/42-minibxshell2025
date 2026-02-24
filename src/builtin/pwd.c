@@ -126,10 +126,11 @@ int	ft_pwd(int c, char **v, char **e, t_msh x)
 	int		t;
 	char	*tm;
 
+	tm = NULL;
 	if (chdir(".") < 0 || c > 1 || (v && !t_m_ctor(&x, 1, e, pipe(x.evm.pd))))
 		return (t_mini_dtor(&x));
 	t = _cwd(x.wdm.pd[1], ft_stat(".", &x.wdm.s0), ft_stat("..", &x.wdm.s1), 0);
-	if (!errno && (t > 0) && ft_memset(tm, 0, sizeof(char *)))
+	if (!errno && (t > 0))
 	{
 		if (!x.wdm.buf || (x.wdm.buf && ft_free(x.wdm.buf, (t_vpp)&x.wdm.buf)))
 			x.wdm.buf = malloc((t + 1) * sizeof(char));

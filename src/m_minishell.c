@@ -91,13 +91,68 @@ t_mini	*t_m_ctor(t_mini *x, int b, char **envp, int k)
 	return (x);
 }
 
+/*
+ * getenv("SHLVL")
+ * */
+int	ft_shlvl(t_mini *x)
+{
+	char	*val;
+	int		intval;
+	char **found;
+	char *str;
+
+	if (x == NULL)
+		return (-1);
+	found = x->evm.find(&x->evm, "SHLVL", &val);
+	if (found == NULL)
+	{
+		if (x->evm.create(&x->evm, "SHLVL=1") == NULL)
+			return (errno);
+	}
+	else
+	{
+		if (ft_atoi_val(val, &intval) == -1)
+			return(errno);
+		val = ft_itoa(++intval);
+		if (!val)
+		{
+			val = ft_strdup("1");
+				if (!val)
+					return (errno);
+		}
+		str = ft_strjoin("SHLVL=", val);
+		if (!str)
+		{
+			ft_free(val, (void **)&val);
+			return(errno);
+		}
+		ft_free(*found, (void **)&*found);
+		*found = str;
+		ft_free(val, (void **)&val);
+	}
+	return (errno);
+}
+/*str = ft_strjoin("SHLVL=", val);
+		if (!str)
+			return (errno);
+		x.envm->create(&x.envm, str);
+		ft_free(str, &str);
+		ft_free(val, &val);
+*/
+
+
 int	t_mini_default(t_mini *p, int p_ok)
 {
-	if (!p || (p && ft_memset(p->wdm.pd + 2, p_ok, sizeof(int)) && !p_ok))
+	if (!p || (p && ft_memset(p->wdm.pd + 2, p_ok, sizeof(int)) && p_ok))
 		return (-1);
 	if ((p->wdm.pd[2] == -1) || (p->batchmode > isatty(0)))
 		return (0);
+	errno = 0;
 	ft_pipeclose((int *)&p->evm.pd);
+	if (ft_shlvl(p))
+	{
+		return (errno);
+	}
 //	if ((ft_pwd(0, NULL, p->evm.envp, *p) != 0) || ft_shlvl(*p))
 	//	return (errno);
 	return (errno);
