@@ -60,7 +60,7 @@ int	t_mini_dtor(t_mini *p)
 	err = errno;
 	if (!p)
 		return (-1);
-	if (((--p->batchmode) > 0) && (p->batchmode == isatty(0)))
+	if (((--p->batchmode) > 0) && (p->batchmode == ft_isatty()))
 		return (errno);
 	if (errno)
 		perror("msh: ");
@@ -98,21 +98,31 @@ int	ft_shlvl(t_mini *x)
 {
 	char	*val;
 	int		intval;
-	char **found;
-	char *str;
+	char	*str;
 
-	if (x == NULL)
+	if (!x)
 		return (-1);
-	found = x->evm.find(&x->evm, "SHLVL", &val);
-	if (found == NULL)
+	str = (char *)SHLVL1_DEF;
+	if (x->evm.find(&x->evm, "SHLVL", &val))
 	{
-		if (x->evm.create(&x->evm, "SHLVL=1") == NULL)
-			return (errno);
+		if (ft_atoi_val(val, &intval) > -1)
+		{
+			val = ft_itoa(++intval);
+			if (val)
+			{
+				str = ft_strjoin("SHLVL=", val);
+				ft_free(val, (void **)&val);
+			}
+		}
 	}
-	else
-	{
-		if (ft_atoi_val(val, &intval) == -1)
-			return(errno);
+	x->evm.create(&x->evm, str);
+	if ((str - (char *)SHLVL1_DEF) != 0)
+		ft_free(str, (void **)&str);
+	return (_errno(&ft_shlvl));
+}
+
+		/*if (ft_atoi_val(val, &intval) == -1)
+			return(_errno(&ft_shlvl));
 		val = ft_itoa(++intval);
 		if (!val)
 		{
@@ -124,14 +134,12 @@ int	ft_shlvl(t_mini *x)
 		if (!str)
 		{
 			ft_free(val, (void **)&val);
-			return(errno);
+			return(_errno(&ft_shlvl));
 		}
 		ft_free(*found, (void **)&*found);
 		*found = str;
 		ft_free(val, (void **)&val);
-	}
-	return (errno);
-}
+		*/
 /*str = ft_strjoin("SHLVL=", val);
 		if (!str)
 			return (errno);
@@ -139,15 +147,12 @@ int	ft_shlvl(t_mini *x)
 		ft_free(str, &str);
 		ft_free(val, &val);
 */
-
-
 int	t_mini_default(t_mini *p, int p_ok)
 {
 	if (!p || (p && ft_memset(p->wdm.pd + 2, p_ok, sizeof(int)) && p_ok))
 		return (-1);
-	if ((p->wdm.pd[2] == -1) || (p->batchmode > isatty(0)))
+	if ((p->wdm.pd[2] == -1) || (p->batchmode > ft_isatty()))
 		return (0);
-	errno = 0;
 	ft_pipeclose((int *)&p->evm.pd);
 	if (ft_shlvl(p))
 	{

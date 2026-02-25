@@ -58,25 +58,7 @@ char	*ft_prompt(char *val)
 		perror(NULL);
 	return (0);
 }
-
-char	*getreadline(char **line, t_prompt p)
-{
-	if (!line)
-		return (NULL);
-	if (isatty(0))
-		*line = readline(p(*line));//shell->prompt = readline(shell->terminal_prompt);	if (!*line)	perror(NULL);
-	else
-	{
-		errno = 0;
-		*line = get_next_line(0);//shell->prompt = ft_strtrim(line, "\n");
-	}
-	if (errno)
-	{
-		perror(NULL);
-		*line = NULL;
-	}
-	return (*line);
-}*/
+*/
 
 /*
 void t_mini_rnl(t_mini *pm)
@@ -99,12 +81,12 @@ void t_mini_rnl(t_mini *pm)
 	return (0);
 }*/
 
-int parse(t_mini *pm, int argc, char **argv)
+int prs(t_mini *pm, int argc, char **argv)
 {
 	if (!pm || (argc == 0) || !argv)
 		return (-1);
 	pm->interactive = 1;
-	return (errno);
+	return (_errno(&prs));
 }
 	/*pm->interactive = argc == 1;*/
 	/*if (!pm->envm.find("PWD") || !pm->envm.find("PS1") || !pm->envm.find("PS2"))
@@ -137,13 +119,13 @@ int	main(int argc, char **argv, char **envp)
 	int		e;
 	char	*line;
 
-	x.batchmode = isatty(0);
-	e = parse(t_m_ctor(&x, isatty(0), envp, pipe((int *)x.evm.pd)), argc, argv);
+	ft_bzero(&x, sizeof(t_minishell));
+	e = prs(t_m_ctor(&x, ft_isatty(), envp, pipe((int *)x.evm.pd)), argc, argv);
 	if (e == 0)
 	{
 		while(1)
 		{
-			if (x.batchmode != 0)
+			if (x.batchmode == 0)
 				line = readline("Minishell> ");
 			else
 				line = get_next_line(0);
@@ -154,8 +136,9 @@ int	main(int argc, char **argv, char **envp)
 			//piipex
 				//pipex_minishell -> builtins o no
 					//execv
-			ft_printf("%s", line);
-			if (x.batchmode != 0)
+			//ft_printf("%s", line);
+			test_sanitizer(line);
+			if (x.batchmode == 0)
 				ft_putchar_fd('\n', 1);
 			free(line);
 		}

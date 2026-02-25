@@ -32,10 +32,13 @@ typedef struct s_minishell
 	t_workdirmgr	wdm;
 } t_minishell,	t_msh, t_mini;
 
+int		_errno(void *p);
+
+int		ft_isatty();
+
 /*
  * m_minishell.c
  * */
-
 int		t_mini_dtor(t_mini *p);
 
 t_mini	*t_m_ctor(t_mini *p, int batch, char **envp, int pipeok);
@@ -43,6 +46,8 @@ t_mini	*t_m_ctor(t_mini *p, int batch, char **envp, int pipeok);
 int		t_mini_default(t_mini *p, int p_ok);
 
 int		ft_pwd(int c, char **v, char **e, t_msh x);
+
+void	test_sanitizer(char *rline);
 
 /*
 # define D_NULL 		"/dev/null"

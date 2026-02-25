@@ -12,8 +12,28 @@
 
 #include "mx_utils.h"
 #include "libft/libft.h"
+#include "ft_printf.h"
 #include <unistd.h>
 #include <stdio.h>
+#include <errno.h>
+
+
+int _errno(void *p)
+{
+	if (errno)
+		ft_printf("%p: ", p);
+	return (errno);
+}
+	
+int ft_isatty()
+{
+	int ret;
+	
+	ret = !isatty(0);
+	if (errno != 0)
+		errno = 0;
+	return (ret);
+}
 
 int ft_pipeclose(int pd[3])
 {

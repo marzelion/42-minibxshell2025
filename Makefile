@@ -2,7 +2,11 @@
 SRCS := src/e_envmgr.c src/e_envmgr_crud.c \
 		src/u_util_pipe.c \
 		src/m_minishell.c \
-		src/builtin/pwd.c
+		src/builtin/pwd.c \
+		src/string_sanitizer/struct_counting.c \
+		src/string_sanitizer/string_sanitizer.c \
+		src/string_sanitizer/sanitizing_utils.c \
+		src/string_sanitizer/double_q.c
 
 SRCS_PIPEX := src/pipex/pipex.c src/pipex/pipex_main.c \
 		src/pipex/pipex_utils.c src/pipex/pipex_process.c
@@ -13,6 +17,8 @@ H_INCLUDES :=  include/mx_utils.h include/pipex.h \
 				include/minishellx.h
 
 SRCS_BONUS := $(SRCS) src/main.c
+
+DEFINES := -DSHLVL1_DEF="\"SHLVL=1\""
 
 H_INCLUDES_BONUS := $(H_INCLUDES)
 
@@ -39,7 +45,7 @@ ifeq ($(MAKECMDGOALS), debugs)
 INCLUDE += -g 
 endif
 
-INCLUDE += -I. -I../ -Iinclude -I../include \
+INCLUDE += $(DEFINES) -I. -I../ -Iinclude -I../include \
 			-I./libftprintf/include \
 			-Ilibft -I../libft \
 			-Ilibftprint -I../libftprintf
