@@ -497,18 +497,18 @@ char	*input[] = {"","","","a","","","","b", NULL};
  * */
 int ft_pipex_split2(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
 {
-	char	**p;
+	char	**token;
 	
 	if (!x || !l || !*l || (*l && !**l) || (x && !x->tokenset) || !ppx || !pid)
 		return (-1 + t_pipex_dtor(ppx));
 	l = ft_split_c(*l, ' ', ft_countufsubstr(*l, ' ',  ft_strlen(*l))); //echo marc [0]=echo [2]= marc [3]=NULL
 	if (!l)
 		return (t_pipex_dtor(ppx));
-	p = l;
-	while (*p && !errno)
+	token = l;
+	while (*token && !errno)
 	{
-		ft_printf("Token is: %s\n", *p);
-		p++;
+		ft_printf("Token is: %s\n", *token);
+		token++;
 	}
 	
 	return (t_pipex_dtor(ppx) + !!ft_strsplit_release(&l));
