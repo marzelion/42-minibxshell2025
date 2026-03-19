@@ -16,6 +16,11 @@
 #include "envmgr.h"
 #include <sys/stat.h>
 
+typedef struct s_charpp
+{
+	char **v;
+} t_charpp;
+
 typedef struct s_workdirmgr
 {
 	int			pd[3];
@@ -26,22 +31,34 @@ typedef struct s_workdirmgr
 
 typedef struct s_minishell
 {
+	int				last_px;
 	int				interactive;
 	int				batchmode;
+	char			*history_path;
+	char			*splitsd;
+	char			**tokenset;
+	int				tkit;
+	int				tkstate;
+	char			*buffer;
 	t_envmanager	evm;
 	t_workdirmgr	wdm;
 } t_minishell,	t_msh, t_mini;
 
+/*
+ * u_util_pipe.c
+ * */
 int		_errno(void *p);
 
-int		ft_isatty();
+int		ft_tty();
 
 /*
  * m_minishell.c
  * */
 int		t_mini_dtor(t_mini *p);
 
-t_mini	*t_m_ctor(t_mini *p, int batch, char **envp, int pipeok);
+t_mini	*t_m_ctor(t_mini *p, char **envp, int pipeok);
+
+# define XCTOR t_m_ctor
 
 int		t_mini_default(t_mini *p, int p_ok);
 

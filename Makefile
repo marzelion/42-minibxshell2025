@@ -1,6 +1,8 @@
 
 SRCS := src/e_envmgr.c src/e_envmgr_crud.c \
+		src/s_sani_utils_a.c src/s_sani_utils_b.c \
 		src/u_util_pipe.c \
+		src/p_pipex_conv.c \
 		src/m_minishell.c \
 		src/builtin/pwd.c \
 		src/string_sanitizer/struct_counting.c \
@@ -13,8 +15,8 @@ SRCS_PIPEX := src/pipex/pipex.c src/pipex/pipex_main.c \
 
 SRCS += $(SRCS_PIPEX)
 
-H_INCLUDES :=  include/mx_utils.h include/pipex.h \
-				include/minishellx.h
+H_INCLUDES :=  include/mx_utils.h include/string_sanitizer.h \
+				include/pipex.h include/pipex_utils.h include/minishellx.h
 
 SRCS_BONUS := $(SRCS) src/main.c
 

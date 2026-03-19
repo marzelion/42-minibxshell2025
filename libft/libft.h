@@ -118,7 +118,7 @@ int			ft_countfilledsubstr(const char *s, char c);
 
 # define FT_SPLTCNT ft_countfilledsubstr
 
-int			ft_countfilledsubstr_l(const char *s, char c, size_t n);
+int			ft_countufsubstr(const char *s, char c, size_t n);
 
 int			ft_countfilledsubstr_n(const char *s, char c, size_t n);
 
@@ -127,6 +127,8 @@ char		**ft_strsplit_release(char ***arr);
 char		**ft_split_l(char const *s, char c[2], size_t n);
 
 char		**ft_split_n(char const *s, char c, size_t n);
+
+char		**ft_split_c(char const *s, char c, int cnt);
 
 char		**ft_split(char const *start, char c);
 

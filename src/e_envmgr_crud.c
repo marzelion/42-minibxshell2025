@@ -38,24 +38,29 @@ int	is_validkey(const char *n)
 			return (0);
 	return (1);
 }
-
+/*
+ * val is optional, but better if caller sets to NULL before, NOT HERE
+ * if (!p || !key)
+ * if (!p || !is_validkey(key))	
+ * */
 char	**t_evm_find(t_envmanager *p, char *key, char **val)
 {
 	char	**tmp;
 	int		f;
 
-	if (!p || !is_validkey(key))
+	if (!p || !key || (key && (*key == '\0')))
 		return ((void *)0);
 	tmp = p->envp;
 	while (tmp && *tmp)
 	{
-		f = ft_strncmp(*tmp, key, ft_strlen_delim(key, '=') + 1);
-		if ((f == -'=') || (f == '=') || (f == 0))
+		//f = ft_strncmp(*tmp, key, ft_strlen_delim(key, '=') + 1);
+		f = ft_strncmp(*tmp, key, ft_strlen_delim(*tmp, '='));
+		if ((f == -'=') || (f == '=') || (f == 0) || (f == '/'))
 		{
 			if (val)
 			{
 				*val = ft_strchr(*tmp, '=');
-				if (**val == '=')
+				if (*val && (**val == '='))
 					(*val)++;
 			}
 			return (tmp);

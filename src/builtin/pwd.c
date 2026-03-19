@@ -127,7 +127,7 @@ int	ft_pwd(int c, char **v, char **e, t_msh x)
 	char	*tm;
 
 	tm = NULL;
-	if (chdir(".") < 0 || c > 1 || (v && !t_m_ctor(&x, 1, e, pipe(x.evm.pd))))
+	if (chdir(".") < 0 || c || (v && !XCTOR(&x, e, FTPIPE(x.evm.pd, 1, 0))))
 		return (t_mini_dtor(&x));
 	t = _cwd(x.wdm.pd[1], ft_stat(".", &x.wdm.s0), ft_stat("..", &x.wdm.s1), 0);
 	if (!errno && (t > 0))

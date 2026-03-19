@@ -17,3 +17,16 @@ void	*ft_free(void *p, void **pp)
 	*pp = (void *)0;
 	return (*pp);
 }
+
+size_t	ft_strsplit_size(char **arridx)
+{
+	size_t	result;
+
+	result = 0;
+	while (*arridx)
+	{
+		arridx++;
+		result++;
+	}
+	return (result);
+}

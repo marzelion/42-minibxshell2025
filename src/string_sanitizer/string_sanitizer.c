@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "string_sanitizer.h"
-
+#include "unistd.h"
 int	ft_seg_len(char *rline, int *i)
 {
 	t_iterators	it;
@@ -151,18 +151,18 @@ void	test_sanitizer(char *rline)
 	ft_sanitize_string(cmd, rline);
 	ft_dqsanit(cmd);
 	// Imprimir valores guardados en cmd->str y shadow
-	ft_printf("   Result: ");
+	ft_printf("   Result:");
 	i = 0;
 	while (i < howmanywords)
 	{
 		if (cmd[i] && cmd[i]->str)
 		{
-			ft_printf("[%d]=\"%s\" ", i, cmd[i]->str);
+			ft_printf("\n[%d]=%s\nshadow: ", i, cmd[i]->str);
 			if (cmd[i]->shadow)
-				ft_printf("(shadow:%s) ", cmd[i]->shadow);
+				write(1, cmd[i]->shadow, ft_strlen(cmd[i]->str));
 		}
 		else
-			ft_printf("[%d]=(null) ", i);
+			ft_printf("\n[%d]=(null) ", i);
 		i++;
 	}
 	ft_printf("\n");

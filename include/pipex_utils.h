@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mx_utils.h                                         :+:      :+:    :+:   */
+/*   pipex_utils.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smrtinez <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,13 +10,14 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MX_UTILS_H
-# define MX_UTILS_H
+#ifndef PIPEX_UTILS_H
+# define PIPEX_UTILS_H
 
-int		ft_pipeclose(int *pd);
+/*
+ * 
+ * */ 
+t_pipex	*ft_pipex_split(t_mini *x, char **line, t_pipex *p);
 
-int		ft_pipe(int *pd, int special, int force);
-
-# define FTPIPE ft_pipe
+int		ft_pipex(t_mini *x, char **lne, int pipexsz);
 
 #endif

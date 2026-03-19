@@ -19,6 +19,8 @@
 #include "pipex.h"
 #include "envmgr.h"
 #include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
 
 /*
 #include <fcntl.h>
@@ -60,7 +62,7 @@ int	t_mini_dtor(t_mini *p)
 	err = errno;
 	if (!p)
 		return (-1);
-	if (((--p->batchmode) > 0) && (p->batchmode == ft_isatty()))
+	if (((--p->batchmode) > 0) && (p->batchmode == ft_tty()))
 		return (errno);
 	if (errno)
 		perror("msh: ");
@@ -68,26 +70,37 @@ int	t_mini_dtor(t_mini *p)
 	t_evm_dtor(&p->evm);
 	if (p->wdm.buf)
 		ft_free(p->wdm.buf, (void **)&p->wdm.buf);
+	if (p->history_path)
+		ft_free(p->history_path, (void **)&p->history_path);
+	if (p->splitsd)
+		ft_free(p->splitsd, (void **)&p->splitsd);
+	if (p->tokenset)
+		ft_strsplit_release(&p->tokenset);
 	return (err);
 }
 
 /*
  * p->batchmode 
  *  >1 ignore multiple construction, DO NOT DESTROY!!
+ * if (!x || (x && ft_memset(x->evm.pd + 2, k, sizeof(int)) && k < 0) || b < 0)
+ * 	x->batchmode += b;
  * */
-t_mini	*t_m_ctor(t_mini *x, int b, char **envp, int k)
+t_mini	*t_m_ctor(t_mini *x, char **envp, int k)
 {
-	if (!x || (x && ft_memset(x->evm.pd + 2, k, sizeof(int)) && k < 0) || b < 0)
+	if (!x || (x && (k < 0)))
 		return (NULL);
-	x->batchmode += b;
+	x->batchmode++;
 	if (x->batchmode > 1)
 		return (x);
+	if (!x->splitsd || !x->tokenset)
+		return (NULL);
 	x->interactive = 0;
 	if (t_evm_ctor(&x->evm, envp, k) == NULL)
 		return (NULL);
 	x->wdm.buf = NULL;
-	if (t_mini_default(x, pipe((int *)&x->wdm.pd) != 0))
+	if (t_mini_default(x, FTPIPE(x->wdm.pd, 1, 0) != 0))
 		return (NULL);
+	x->history_path = NULL;
 	return (x);
 }
 
@@ -121,48 +134,56 @@ int	ft_shlvl(t_mini *x)
 	return (_errno(&ft_shlvl));
 }
 
-		/*if (ft_atoi_val(val, &intval) == -1)
-			return(_errno(&ft_shlvl));
-		val = ft_itoa(++intval);
-		if (!val)
-		{
-			val = ft_strdup("1");
-				if (!val)
-					return (errno);
-		}
-		str = ft_strjoin("SHLVL=", val);
-		if (!str)
-		{
-			ft_free(val, (void **)&val);
-			return(_errno(&ft_shlvl));
-		}
-		ft_free(*found, (void **)&*found);
-		*found = str;
-		ft_free(val, (void **)&val);
-		*/
-/*str = ft_strjoin("SHLVL=", val);
-		if (!str)
-			return (errno);
-		x.envm->create(&x.envm, str);
-		ft_free(str, &str);
-		ft_free(val, &val);
+/*
+ * SI QUISIERA GUARDAR EL ARCHIVO DEL HISTORIAL EN HOME, DE FORMA QUE
+ *  TODOS LOS USUARIOS 	TENGAN ACCESO A SU PROPIO HISTORIAL
+ *  INDEPENDIENTEMENTE DESDE DONDE EJECUTEN MINISHELL IGUALMENTE 
+ * CREO QUE ES VALIDO QUE EL HISTORIAL SE GUARDE DENTRO DEL
+ *  DIRECTORIO DEL PROYECTO
+*/
+/*if(home)
+	{
+		history_path = ft_calloc(ft_strlen(home) + ft_strlen("/.minishell_history" + 1, sizeof(char)));
+		ft_strlen(x->evm.find("HOME")
+		if (!history_path)
+			ft_exit(1);
+		ft_strcpy(history_path, home);
+		ft_strcat(history_path, "./minishell_history");
+	}
+	else
+		history_path = ft_srtdup("./minishell_history");
+		* 
+	//char	*history_path;
+	/////////////////////////
+	x->history_path FLAG!!!!! PARA CONFIRMAR que guardo el hstory
+	
+	if (x->history_path)
+		add_history(line);
+	
+	/////////////////////////
+*/
+char	*ft_current_directory_history_path(t_mini *x)
+{
+	x->history_path = "/tmp";
+	x->history_path = ft_strjoin(x->history_path, "/.minishell_history");
+	if (!x->history_path)
+		perror("error creating string for readline_history file\n");
+	return (x->history_path);
+}
+
+/*
+ * removed ft_pipeclose((int *)&p->evm.pd);
 */
 int	t_mini_default(t_mini *p, int p_ok)
 {
-	if (!p || (p && ft_memset(p->wdm.pd + 2, p_ok, sizeof(int)) && p_ok))
+	if (!p || (p && p_ok))
 		return (-1);
-	if ((p->wdm.pd[2] == -1) || (p->batchmode > ft_isatty()))
-		return (0);
-	ft_pipeclose((int *)&p->evm.pd);
-	if (ft_shlvl(p))
-	{
+	if ((p->wdm.pd[2] == -1) || ft_shlvl(p) || (p->batchmode > ft_tty()))
 		return (errno);
-	}
-//	if ((ft_pwd(0, NULL, p->evm.envp, *p) != 0) || ft_shlvl(*p))
-	//	return (errno);
+	if (ft_pwd(0, NULL, p->evm.envp, *p) || ft_current_directory_history_path(p))
+		return (errno);
 	return (errno);
 }
-
 
 typedef char* (*t_prompt)(char *);
 /*

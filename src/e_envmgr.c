@@ -30,12 +30,6 @@ t_envmanager	*t_evm_dtor(t_envmanager *p)
 	if (p->envp && (p->envp != p->envpbase))
 		ft_strsplit_release(&p->envp);
 	ft_pipeclose(p->pd);
-/*	if (p->pipeenv[0] != -1)
-		close(p->pipeenv[0]);
-	if (p->pipeenv[1] != -1)
-		close(p->pipeenv[1]);
-	ft_memset(p->pipeenv, -1, 2 * sizeof(int));
-	* */
 	return (p);
 }
 
