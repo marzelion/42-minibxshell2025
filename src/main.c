@@ -555,7 +555,8 @@ int	main(int ac, char **av, char **ep)
 		* 
 		* 
 		* */
-		if (*l && (x.tkit && ft_pipex(&x, &l, x.tkit)))
+		//if (*l && (x.tkit && ft_pipex(&x, &l, x.tkit)))
+		if (!l || ft_pipex(&x, &l, ft_countufsubstr(l, '|',  ft_strlen(l))))
 			break ;
 		ft_printf("Line was: %s\n", l);
 		ft_free(l, (void **)&l);

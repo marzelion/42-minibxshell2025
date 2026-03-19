@@ -480,28 +480,67 @@ int ft_pipex_split(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
 	return (t_pipex_dtor(ppx) + !!ft_strsplit_release(&l));
 }
 
+/*
+ * given    a    b (3 spaces before a, 3 space before b)
+Line is:    a    b
+Split is:    a    b
+Token is: 
+Token is: 
+Token is: 
+Token is: a
+Token is: 
+Token is: 
+Token is: 
+Token is: b
+char	*input[] = {"","","","a","","","","b", NULL};
+
+ * */
+int ft_pipex_split2(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
+{
+	char	**p;
+	
+	if (!x || !l || !*l || (*l && !**l) || (x && !x->tokenset) || !ppx || !pid)
+		return (-1 + t_pipex_dtor(ppx));
+	l = ft_split_c(*l, ' ', ft_countufsubstr(*l, ' ',  ft_strlen(*l))); //echo marc [0]=echo [2]= marc [3]=NULL
+	if (!l)
+		return (t_pipex_dtor(ppx));
+	p = l;
+	while (*p && !errno)
+	{
+		ft_printf("Token is: %s\n", *p);
+		p++;
+	}
+	
+	return (t_pipex_dtor(ppx) + !!ft_strsplit_release(&l));
+}
+	
 int ft_pipex(t_mini *x, char **l, int pipexsz)
 {
 	pid_t	*pxs;
+	pid_t	*ppxs;
 	t_pipex	ppx;
 	char	**p;
-	(void)ppx;
+(void)ppx;
 	if (!x || !l || !*l || (*l && !**l) || !pipexsz || (x && !x->tokenset))
 		return (-1);
 	pxs = ft_calloc(pipexsz, sizeof(pid_t));
 	if (!pxs)
 		return (errno);
+	ft_printf("Line is: %s\n", *l);
 	l = ft_split_c(*l, '|', pipexsz); //echo | marc --> [0]=echo [1]=\0 [2]= marc [3]=NULL
 	if (!l)
 		return (errno + !!ft_free(pxs, (void **)&pxs));
 	p = l;
-	pxs += pipexsz;
-	while ((pxs--) && *(p++) && !errno)
-	{
+	ppxs = pxs;
+	while (*(p++) && !errno)
+	{		
 		ft_striteri(*(p - 1), FFtopipe_ws); //"|"->"0x7f"
-		x->last_px = ft_pipex_split(x, p - 1, t_pipex_ctor(&ppx), &pxs);
-		if (x->last_px)
-			break ;
+		ft_printf("Split is: %s\n", *(p - 1));
+		ft_pipex_split2(x, p - 1, t_pipex_ctor(&ppx), &ppxs);
+		//x->last_px = ft_pipex_split(x, p - 1, t_pipex_ctor(&ppx), &ppxs);
+		//if (x->last_px)
+			//break ;
+		ppxs++;
 	}
 	return (errno + !!ft_strsplit_release(&l) + !!ft_free(pxs, (void **)&pxs));
 }	
