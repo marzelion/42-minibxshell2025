@@ -495,19 +495,98 @@ Token is: b
 char	*input[] = {"","","","a","","","","b", NULL};
 
  * */
+ 
+int pipex_istoken(t_mini *x, char *symbol)
+{
+	int		result;
+	char	**tktag;
+	int		cmp;
+
+	tktag = x->tokenset;
+	result = 22;
+	while (*(tktag++) && *(tktag++))
+	{//cmp = ft_strncmp(*(tktag - 2), symbol, ft_strlen(*(tktag - 2)) + 1);
+		if (ft_strncmp(*(tktag - 2), symbol, ft_strlen(*(tktag - 2)) + 1) == '\0')
+		{
+			result = tktag - 2 - x->tokenset;//ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, *(tktag - 2));
+			ft_printf(" - Token is: %d %s\n", result, symbol);
+		}
+		else
+		{
+			cmp = tktag - 2 - x->tokenset;
+			if ((cmp == 0) || (cmp == 2) || (cmp == 18) || (cmp == 20))
+			{
+				if(ft_strnstr(symbol, *(tktag - 2), ft_strlen(*(tktag - 2)) + 1))
+				{
+					ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, *(tktag - 2));
+					if (result == 22)
+						result = tktag - 2 - x->tokenset;
+					else if ((tktag - 2 - x->tokenset) > result)
+						result = 22;
+				}
+			}
+		}
+	}
+	if (result == 22)
+		ft_printf("%s:Syntax error\n", symbol);
+	else
+		ft_printf(" - Token is: %d %s\n", result, symbol);
+		//ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, symbol);
+	return (result);
+}
+		//ft_printf(" - cmp is %d: %d %s\n", cmp, tktag - 2 - x->tokenset, *(tktag - 2));
+		/*cmp = ft_strncmp(*(tktag - 2), symbol, ft_strlen(*(tktag - 2)));
+		//cmp = ft_strncmp(symbol, *(tktag - 2), ft_strlen(symbol));
+		//if ((cmp == '\0') || ((cmp != '\0') && (cmp != -'<')))
+		if (cmp == (int)'\0')
+			ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, *(tktag - 2));
+			*/
+		
+		
+
+/*
+void pipex_istoken(t_mini *x, char *symbol)
+{
+    char **tktag;
+    int cmp;
+    
+    tktag = x->tokenset;
+    
+    while (*tktag)  // Mientras el token no sea NULL
+    {
+        cmp = ft_strncmp(*tktag, symbol, ft_strlen(symbol));
+        if (cmp == 0)
+        {
+            ft_printf(" - Token is: %d %s\n", (int)(tktag - x->tokenset), *tktag);
+        }
+        tktag += 2;  // Saltar al siguiente token (pares)
+    }
+}
+*/
+ 
 int ft_pipex_split2(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
 {
 	char	**token;
 	
 	if (!x || !l || !*l || (*l && !**l) || (x && !x->tokenset) || !ppx || !pid)
 		return (-1 + t_pipex_dtor(ppx));
-	l = ft_split_c(*l, ' ', ft_countufsubstr(*l, ' ',  ft_strlen(*l))); //echo marc [0]=echo [2]= marc [3]=NULL
+	l = ft_split_c(*l, ' ', ft_countufsubstr(*l, ' ',  ft_strlen(*l))); //echo marc [0]=echo  [1]=\0 [2]= marc [3]=NULL
 	if (!l)
 		return (t_pipex_dtor(ppx));
 	token = l;
 	while (*token && !errno)
 	{
-		ft_printf("Token is: %s\n", *token);
+		ft_printf(" Parsing %s?\n", *token);
+		pipex_istoken(x, *token);
+		//ft_printf(" - Token is: %s?%s\n", *token, x->tokenset[x->tkit]);
+		/*if (ft_strncmp(x->tokenset[x->tkit], *token, ft_strlen(x->tokenset[x->tkit]) + 1) == '\0')
+			ft_printf("redirection\n");
+		else if (ft_strncmp(x->tokenset[x->tkit], *token, ft_strlen(x->tokenset[x->tkit]) + 1) == -'<')
+			ft_printf("here_doc\n");
+		else
+			ft_printf("??\n");
+		*/
+			
 		token++;
 	}
 	

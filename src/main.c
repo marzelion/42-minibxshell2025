@@ -484,7 +484,7 @@ t_mini *_zset(t_mini *x, int istty)
 	ft_striteri(x->splitsd + 1, single_noexptozero);
 	//toks = ft_strdup("<<\'<<\'");
 	//toks = ft_strdup("<<\'<<\'>>\'>>\'echo\'cd\'pwd\'env\'unset\'export\'exit\'");
-	toks = ft_strdup("<<\'<<\'echo\'cd\'pwd\'env\'unset\'export\'exit\'>>\'>>\'");
+	toks = ft_strdup("<\'<<\'echo\'cd\'pwd\'env\'unset\'export\'exit\'>\'>>\'");
 	if (!toks)
 		return (x);
 	toksz = ft_strlen(toks);
