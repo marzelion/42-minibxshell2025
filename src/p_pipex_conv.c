@@ -14,6 +14,8 @@
 #include "ft_printf.h"
 #include <errno.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "pipex.h"
 #include "minishellx.h"
 #include "mx_utils.h"
@@ -240,7 +242,8 @@ t_ppx_conv ft_lex(t_mini *x, char *symbol)
 /*
  * if copy ok, change to normal, but for the next token!!
  * */
-typedef void *(*t_lexstatefunc)(t_mini *, char **, int);
+//typedef void *(*t_lexstatefunc)(t_mini *, char **, t_pipex *);
+typedef void *(*t_lexstatefunc)(t_mini *, const char *, t_pipex *);
 
 
 /*t_lexstatefunc lexstate_heredocredir(t_mini *x, char **token)
@@ -257,7 +260,7 @@ typedef void *(*t_lexstatefunc)(t_mini *, char **, int);
 }*/
 void *lexstate_normal(t_mini *x, char **token, int cmp);
 
-void *lexstate_inredir(t_mini *x, char **token, int cmp)
+void *lexstate_inredir_1(t_mini *x, char **token, int cmp)
 {
 	char *tmp;
 	
@@ -266,9 +269,9 @@ void *lexstate_inredir(t_mini *x, char **token, int cmp)
 	if ((x->tkit == 0) && (cmp == -'<') && (x->tkit++) && (x->tkit++))
 		return (lexstate_normal);
 	else if ((x->tkit == 0) && (cmp == '\0') && (x->tkit++))
-		return (lexstate_inredir);
+		return (lexstate_inredir_1);
 	else if (x->tkit == 0)
-		return (lexstate_inredir);
+		return (lexstate_inredir_1);
 	tmp = x->buffer;
 	if ((x->tkit == 0) && (x->tkit++) && (x->tkit++))
 		x->buffer = FT_JOIN(x->buffer, *token);
@@ -290,7 +293,7 @@ void *lexstate_normal(t_mini *x, char **token, int cmp)
 		return (NULL);
 	cmp = ft_strncmp(x->tokenset[x->tkit], *token, ft_strlen(x->tokenset[x->tkit]));
 	if (x->tkit < 2)
-		return (lexstate_inredir(x, token, cmp));
+		return (lexstate_inredir_1(x, token, cmp));
 	return (lexstate_normal);
 	/*if (((x->tkit < 0) && ((cmp == '\0') || (cmp != -'<'))))
 		return (lexstate_inredir(x, token));
@@ -405,11 +408,11 @@ int ft_pipex_split(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
 		return (t_pipex_dtor(ppx));
 	p = l;
 	x->tkstate = STATE_NORMAL;
-	lex_state = lexstate_normal;
+	//lex_state = lexstate_normal;
 	x->tkit = 0;
 	while (*p && !errno)
 	{		
-		lex_state = (*lex_state)(x, p, 0);
+		//lex_state = (*lex_state)(x, p, 0);
 		p++;
 		/*if (lex_state != lexstate_normal)
 		{
@@ -480,149 +483,272 @@ int ft_pipex_split(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
 	return (t_pipex_dtor(ppx) + !!ft_strsplit_release(&l));
 }
 
-/*
- * given    a    b (3 spaces before a, 3 space before b)
-Line is:    a    b
-Split is:    a    b
-Token is: 
-Token is: 
-Token is: 
-Token is: a
-Token is: 
-Token is: 
-Token is: 
-Token is: b
-char	*input[] = {"","","","a","","","","b", NULL};
-
- * */
- 
-int pipex_istoken(t_mini *x, char *symbol)
+int check_triplet(const char *in, char c)
 {
-	int		result;
-	char	**tktag;
-	int		cmp;
+	return ((*in++ == c) && ((*in && (*(in++) == c))) && ((*in && (*in == c))));
+}
 
-	tktag = x->tokenset;
-	result = 22;
-	while (*(tktag++) && *(tktag++))
-	{//cmp = ft_strncmp(*(tktag - 2), symbol, ft_strlen(*(tktag - 2)) + 1);
-		if (ft_strncmp(*(tktag - 2), symbol, ft_strlen(*(tktag - 2)) + 1) == '\0')
-		{
-			result = tktag - 2 - x->tokenset;//ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, *(tktag - 2));
-			ft_printf(" - Token is: %d %s\n", result, symbol);
-		}
-		else
-		{
-			cmp = tktag - 2 - x->tokenset;
-			if ((cmp == 0) || (cmp == 2) || (cmp == 18) || (cmp == 20))
-			{
-				if(ft_strnstr(symbol, *(tktag - 2), ft_strlen(*(tktag - 2)) + 1))
-				{
-					ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, *(tktag - 2));
-					if (result == 22)
-						result = tktag - 2 - x->tokenset;
-					else if ((tktag - 2 - x->tokenset) > result)
-						result = 22;
-				}
-			}
-		}
+int redir_normalize(const char *in, char **out_norm, int *pf, int *c)
+{
+	*c = !FT_MSET(pf, -1, 3 * sizeof(int)) + FTPIPE(pf, 1, 0);
+	while (in && out_norm && *in && !errno)
+	{
+		if (check_triplet(in, '<'))
+				return (-1 + ft_pipeclose(pf));
+		if ((*in == '<') && ((*(in + 1) && (*(in + 1) == '<'))) && in++)
+			*c += ft_putstr_fd(" << ", pf[1]);
+		else if (*in == '<')
+			*c += ft_putstr_fd(" < ", pf[1]);
+		if (check_triplet(in, '>'))
+				return (-1 + ft_pipeclose(pf));
+		if ((*in == '>') && ((*(in + 1) && (*(in + 1) == '>'))) && in++)
+			*c += ft_putstr_fd(" >> ", pf[1]);
+		else if (*in == '>')
+			*c += ft_putstr_fd(" > ", pf[1]);
+		if ((*in != '<') && (*in != '>'))
+			*c += ft_putchar_fd(*in, pf[1]);
+		in++;
 	}
-	if (result == 22)
-		ft_printf("%s:Syntax error\n", symbol);
-	else
-		ft_printf(" - Token is: %d %s\n", result, symbol);
-		//ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, symbol);
-	return (result);
+	if (!errno && ft_memset(out_norm, 0, sizeof(char *)))
+		*out_norm = ft_calloc(*c + 1 + 8, sizeof(char));
+	if ((!*out_norm) || (*out_norm && (!ft_memcpy(*out_norm, "./pipex ", 8))))
+		return (-(*out_norm == NULL) + ft_pipeclose(pf));
+	(*out_norm)[*c] = '\0';
+	return (read(pf[0], *out_norm, *c) + ft_pipeclose(pf));
 }
-		//ft_printf(" - cmp is %d: %d %s\n", cmp, tktag - 2 - x->tokenset, *(tktag - 2));
-		/*cmp = ft_strncmp(*(tktag - 2), symbol, ft_strlen(*(tktag - 2)));
-		//cmp = ft_strncmp(symbol, *(tktag - 2), ft_strlen(symbol));
-		//if ((cmp == '\0') || ((cmp != '\0') && (cmp != -'<')))
-		if (cmp == (int)'\0')
-			ft_printf(" - Token is: %d %s\n", tktag - 2 - x->tokenset, *(tktag - 2));
-			*/
-		
-		
 
-/*
-void pipex_istoken(t_mini *x, char *symbol)
+typedef enum e_state {
+    ST_ANY = 0,
+    ST_EXPECT_IN,
+    ST_EXPECT_HEREDOC,
+    ST_EXPECT_OUT
+} t_state;
+
+void *lexstate_any(t_mini *x, const char *t, t_pipex *ppx);
+void *lexstate_inredir(t_mini *x, const char *t, t_pipex *ppx);
+void *lexstate_heredoc(t_mini *x, const char *t, t_pipex *ppx);
+void *lexstate_outredir(t_mini *x, const char *winn_t, t_pipex *ppx);
+void *lexstate_appndredir(t_mini *x, const char *winn_t, t_pipex *ppx);
+//void *lexstate_inredir(t_mini *x, const char *t, int *pf, int *c);
+
+int streq(const char *a, const char *b)
 {
-    char **tktag;
-    int cmp;
-    
-    tktag = x->tokenset;
-    
-    while (*tktag)  // Mientras el token no sea NULL
-    {
-        cmp = ft_strncmp(*tktag, symbol, ft_strlen(symbol));
-        if (cmp == 0)
-        {
-            ft_printf(" - Token is: %d %s\n", (int)(tktag - x->tokenset), *tktag);
-        }
-        tktag += 2;  // Saltar al siguiente token (pares)
-    }
+	return (ft_strncmp(a, b, ft_strlen(b) + 1) == 0);
 }
-*/
- 
-int ft_pipex_split2(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
+
+int is_op_token(const char *t)
 {
-	char	**token;
+	return (streq(t, "<") || streq(t, "<<") || streq(t, ">") || streq(t, ">>"));
+}
+
+// strdup y free anterior si existe
+void ft_strreplace(char **dst, const char *src)
+{
+	char *tmp;
+
+	**dst = '\0';
+	tmp = ft_strdup(src);
+	if (!tmp || errno)
+		return ;
+	ft_free(*dst, (void **)dst);
+	*dst = tmp;
+}
+
+void *lexstate_any(t_mini *x, const char *t, t_pipex *ppx)
+{
+	(void)ppx;
+	if (streq(t, "<"))
+		return lexstate_inredir;
+	else if (streq(t, "<<"))
+		return lexstate_heredoc;
+	else if (streq(t, ">"))
+		return lexstate_outredir;
+	else if (streq(t, ">>"))
+		return lexstate_appndredir;
+	//*c = ft_putstr_fd((char *)t, pf[1]);
+	x->tkit = 8;
+	while(x->tkit < 22)
+	{
+		if (streq(t, x->tokenset[x->tkit]))
+		{
+			//if (x->tokenset[x->tkit] == 0)
+				//x->tokenset[x->tkit]++;
+			break ;
+		}
+		x->tkit += 2;
+	}
+	return (lexstate_any);
+}
+
+void *lexstate_appndredir(t_mini *x, const char *winn_t, t_pipex *ppx)
+{
+	(void)x;
+	(void)winn_t;
+	(void)ppx;
+	return (lexstate_any);
+}
+
+void *lexstate_outredir(t_mini *x, const char *winn_t, t_pipex *ppx)
+{
+	(void)x;
+	(void)winn_t;
+	(void)ppx;
+	return (lexstate_any);
+}
+
+void *lexstate_heredoc(t_mini *x, const char *winn_t, t_pipex *ppx)
+{
+	(void)x;
+	(void)winn_t;
+	(void)ppx;
+	return (lexstate_any);
+}
+
+void *lexstate_inredir(t_mini *x, const char *winn_t, t_pipex *ppx)
+{
+	int		pipefd[2];
+	t_procx	hdoc_px;
+
+	if (is_op_token(winn_t) && (errno++) && ft_perror(++errno, "inredir", 0, 0))
+		return (NULL);
+	if ((*x->tokenset[3] != '\0') && ft_memset(&hdoc_px, 0, sizeof(hdoc_px)))
+	{
+		if (ft_perror(pipe(pipefd), _W, 1, 0) )
+			return (NULL);
+		ppx->ppfd = pipefd;
+		ppx->lim = x->tokenset[3];
+		if (t_pipex_redirect_parent(ppx, &hdoc_px) && errno)
+			return (NULL);
+		ppx->error = close(pipefd[0]) + close(pipefd[1]);
+		ppx->ppfd = NULL;
+		ppx->infilefd = -1;
+	}
+	if (*x->tokenset[1] != '\0')
+	{
+		pipefd[1] = O_RDONLY;
+		pipefd[0] = filex_prp(x->tokenset[1], (pipefd + 1), 0, NULL);
+		ppx->error = (pipefd[0] == -1) + (pipefd[1] < 0) + close(pipefd[0]);
+	}
+	ft_strreplace(&(x->tokenset[1]), winn_t);
+	return (lexstate_any);
+}
+/*	char *tmp;
+	
+	if (!x || !token)
+		return (NULL);
+	if ((x->tkit == 0) && (cmp == -'<') && (x->tkit++) && (x->tkit++))
+		return (lexstate_normal);
+	else if ((x->tkit == 0) && (cmp == '\0') && (x->tkit++))
+		return (lexstate_inredir);
+	else if (x->tkit == 0)
+		return (lexstate_inredir);
+	tmp = x->buffer;
+	if ((x->tkit == 0) && (x->tkit++) && (x->tkit++))
+		x->buffer = FT_JOIN(x->buffer, *token);
+	else if ((x->tkit == 1) && (x->tkit++))
+	{
+		**(token - 1) = ' ';
+		x->buffer = FT_JOIN(x->buffer, *token);
+	}
+	else 
+		x->buffer = FT_JOIN(x->buffer, "/dev/stdin ");
+	if (tmp)
+		ft_free(tmp, (void **)&tmp);
+	return (lexstate_normal);*/
+
+
+void ft_pipex_cmdconv(t_mini *x, char **tokv, t_pipex *ppx)
+{
+	const char	*t;
+	t_lexstatefunc	st;
+
+	st = lexstate_any;
+	while(*(tokv++) && !errno)
+	{
+		t = *(tokv - 1);
+		st = (*st)(x, t, ppx);
+		/*if (st == ST_ANY)
+		{ //"<outfile <outfile => outfile outfile ..."
+			if (streq(t, "<"))
+				return lexstate_inredir;
+			else if (streq(t, "<<"))
+				return lexstate_heredoc;
+			else if (streq(t, ">"))
+				return lexstate_outredir;
+			else if (streq(t, ">>"))
+				return lexstate_outappend;
+		}*/
+		/*st = ST_EXPECT_IN;
+		else if (st == ST_EXPECT_IN)
+			st = ST_ANY;
+		else if (st == ST_EXPECT_HEREDOC)
+			st = ST_ANY;
+		else if (st == ST_EXPECT_OUT)
+			st = ST_ANY;
+		else if (st == ST_EXPECT_OUTAPPEND)
+			st = ST_ANY;			*/
+	}
+	if (st != lexstate_any)
+		return ;
+	return ;
+}
+int ft_pipex_split_1(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
+{
+	int pfd[3];
+	int c;	//char **p;
+	char *out_norm;
 	
 	if (!x || !l || !*l || (*l && !**l) || (x && !x->tokenset) || !ppx || !pid)
 		return (-1 + t_pipex_dtor(ppx));
-	l = ft_split_c(*l, ' ', ft_countufsubstr(*l, ' ',  ft_strlen(*l))); //echo marc [0]=echo  [1]=\0 [2]= marc [3]=NULL
-	if (!l)
+	if (redir_normalize(*l, &out_norm, pfd, &c) < 1)
 		return (t_pipex_dtor(ppx));
-	token = l;
-	while (*token && !errno)
+	ft_printf("Line norm: %s\n", out_norm);
+	l = ft_split_c(out_norm, ' ', ft_countufsubstr(out_norm, ' ',  ft_strlen(out_norm))); //echo marc [0]=echo [2]= marc [3]=NULL
+	if (!l)
+		return (t_pipex_dtor(ppx) + !ft_free(out_norm, (void **)&out_norm) - 1);
+	if (l && !errno)
 	{
-		ft_printf(" Parsing %s?\n", *token);
-		pipex_istoken(x, *token);
-		//ft_printf(" - Token is: %s?%s\n", *token, x->tokenset[x->tkit]);
-		/*if (ft_strncmp(x->tokenset[x->tkit], *token, ft_strlen(x->tokenset[x->tkit]) + 1) == '\0')
-			ft_printf("redirection\n");
-		else if (ft_strncmp(x->tokenset[x->tkit], *token, ft_strlen(x->tokenset[x->tkit]) + 1) == -'<')
-			ft_printf("here_doc\n");
-		else
-			ft_printf("??\n");
-		*/
-			
-		token++;
+		ft_pipex_cmdconv(x, l, ppx);
+		//c = FTPIPE(pfd, 1, 0);
+
+		/*p = l;
+		while (*(p++))
+		{
+			ft_striteri(*(p - 1), FFtopipe_ws);
+			ft_printf("%p~%s\n", p -1, *(p - 1));
+		}*/
 	}
-	
-	return (t_pipex_dtor(ppx) + !!ft_strsplit_release(&l));
+	ft_free(out_norm, (void **)&out_norm);
+	return (t_pipex_dtor(ppx) + (ft_strsplit_release(&l) != NULL));
 }
-	
+
 int ft_pipex(t_mini *x, char **l, int pipexsz)
 {
 	pid_t	*pxs;
-	pid_t	*ppxs;
 	t_pipex	ppx;
 	char	**p;
-(void)ppx;
+	(void)ppx;
 	if (!x || !l || !*l || (*l && !**l) || !pipexsz || (x && !x->tokenset))
 		return (-1);
 	pxs = ft_calloc(pipexsz, sizeof(pid_t));
 	if (!pxs)
 		return (errno);
-	ft_printf("Line is: %s\n", *l);
 	l = ft_split_c(*l, '|', pipexsz); //echo | marc --> [0]=echo [1]=\0 [2]= marc [3]=NULL
 	if (!l)
 		return (errno + !!ft_free(pxs, (void **)&pxs));
 	p = l;
-	ppxs = pxs;
+	//pxs += pipexsz;
+	//pxs = pipexsz;
+	//while ((pxs--) && *(p++) && !errno)
 	while (*(p++) && !errno)
-	{		
-		ft_striteri(*(p - 1), FFtopipe_ws); //"|"->"0x7f"
-		ft_printf("Split is: %s\n", *(p - 1));
-		ft_pipex_split2(x, p - 1, t_pipex_ctor(&ppx), &ppxs);
-		//x->last_px = ft_pipex_split(x, p - 1, t_pipex_ctor(&ppx), &ppxs);
-		//if (x->last_px)
-			//break ;
-		ppxs++;
+	{
+		//ft_striteri(*(p - 1), FFtopipe_ws); //"|"->"0x7f"
+		x->last_px = ft_pipex_split_1(x, p - 1, t_pipex_ctor(&ppx), &pxs);
+		if (x->last_px)
+			break ;
 	}
 	return (errno + !!ft_strsplit_release(&l) + !!ft_free(pxs, (void **)&pxs));
-}	
+}
 /*	if (ft_pipex_split(x, lne, &pipex))
 	{	
 		return (t_pipex_dtor(&pipex));
@@ -638,5 +764,4 @@ int ft_pipex(t_mini *x, char **l, int pipexsz)
 		}
 	}
 	return (t_pipex_dtor(&pipex));
-	* */
-
+* */

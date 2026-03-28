@@ -62,7 +62,11 @@ void pipetoFF(unsigned int pos, char *ps)
 	if (!ps)
 		return ;
 	if (*ps == '|')
-		*ps = 0x7F;
+		*ps = 0x7F;	
+	if (*ps == '<')
+		*ps = 0x02;
+	if (*ps == '>')
+		*ps = 0x03;
 }
 
 void FFtopipe_ws(unsigned int pos, char *ps)
@@ -72,6 +76,8 @@ void FFtopipe_ws(unsigned int pos, char *ps)
 		return ;
 	if ((*ps - 0x7F) == 0)
 		*ps = '|';
-	if (ft_isblank(*ps))
-		*ps = ' ';
+	if ((*ps - 0x02) == 0)
+		*ps = '<';
+	if ((*ps - 0x03) == 0)
+		*ps = '>';
 }

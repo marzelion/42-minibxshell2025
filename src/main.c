@@ -380,7 +380,7 @@ char **p2 = splitcmd;
 
 int sanitizes(t_mini *x, char **lne, char *splts, void(*add_his)(const char *))
 {
-	char **p;
+	//char **p;
 	
 	if (!x || !lne || (lne && !*lne) || !splts)
 		return (-1);
@@ -391,7 +391,7 @@ int sanitizes(t_mini *x, char **lne, char *splts, void(*add_his)(const char *))
 	if (!*lne || (*lne && !ft_strlen(*lne)))
 		return (errno);
 	x->tkit = ft_countufsubstr(*lne, '|',  ft_strlen(*lne));
-	lne = ft_split_c(*lne, '|', x->tkit);
+/*	lne = ft_split_c(*lne, '|', x->tkit);
 	if (lne && !errno)
 	{
 		p = lne;
@@ -401,7 +401,7 @@ int sanitizes(t_mini *x, char **lne, char *splts, void(*add_his)(const char *))
 			ft_printf("%p>%s\n", p -1, *(p - 1));
 		}
 		ft_strsplit_release(&lne);
-	}
+	}*/
 	return (errno);
 }
 
@@ -484,7 +484,7 @@ t_mini *_zset(t_mini *x, int istty)
 	ft_striteri(x->splitsd + 1, single_noexptozero);
 	//toks = ft_strdup("<<\'<<\'");
 	//toks = ft_strdup("<<\'<<\'>>\'>>\'echo\'cd\'pwd\'env\'unset\'export\'exit\'");
-	toks = ft_strdup("<\'<<\'echo\'cd\'pwd\'env\'unset\'export\'exit\'>\'>>\'");
+	toks = ft_strdup("<\'<<\'>\'>>\'echo\'cd\'pwd\'env\'unset\'export\'exit\'");
 	if (!toks)
 		return (x);
 	toksz = ft_strlen(toks);
@@ -508,6 +508,40 @@ int prs(t_mini *x, int argc, char **argv)
 	x->interactive = 1;
 	return (_errno(&prs));
 }
+/*
+int check_triplet_1(const char *in, char c)
+{
+	return ((*in++ == c) && ((*in && (*(in++) == c))) && ((*in && (*in == c))));
+}
+int redir_normalize_1(const char *in, char **out_norm, int *pf, int *c)
+{
+	*c = !FT_MSET(pf, -1, 3 * sizeof(int)) + FTPIPE(pf, 1, 0);
+	while (in && out_norm && *in && !errno)
+	{
+		if (check_triplet_1(in, '<'))
+				return (-1 + ft_pipeclose(pf));
+		if ((*in == '<') && ((*(in + 1) && (*(in + 1) == '<'))) && in++)
+			*c += ft_putstr_fd(" << ", pf[1]);
+		else if (*in == '<')
+			*c += ft_putstr_fd(" < ", pf[1]);
+		if (check_triplet_1(in, '>'))
+				return (-1 + ft_pipeclose(pf));
+		if ((*in == '>') && ((*(in + 1) && (*(in + 1) == '>'))) && in++)
+			*c += ft_putstr_fd(" >> ", pf[1]);
+		else if (*in == '>')
+			*c += ft_putstr_fd(" > ", pf[1]);
+		if ((*in != '<') && (*in != '>'))
+			*c += ft_putchar_fd(*in, pf[1]);
+		in++;
+	}
+	if (!errno && ft_memset(out_norm, 0, sizeof(char *)))
+		*out_norm = ft_calloc(*c + 1, sizeof(char));
+	if (!*out_norm)
+		return (-(*out_norm == NULL) + ft_pipeclose(pf));
+	(*out_norm)[*c] = '\0';
+	return (read(pf[0], *out_norm, *c) + ft_pipeclose(pf));
+}
+* */
 /*
  * p->batchmode 
  *  >1 ignore multiple construction, DO NOT DESTROY!!
@@ -555,8 +589,14 @@ int	main(int ac, char **av, char **ep)
 		* 
 		* 
 		* */
+		//char *out_norm;
+		//int pfd[3];
+		//int c;
+		//if ((redir_normalize_1(l, &out_norm, pfd, &c) < 1) || errno)
+			//break ;
+		//ft_printf("Line norm: %s\n", out_norm);
+		if (*l && (x.tkit && ft_pipex(&x, &l, x.tkit)))
 		//if (*l && (x.tkit && ft_pipex(&x, &l, x.tkit)))
-		if (!l || ft_pipex(&x, &l, ft_countufsubstr(l, '|',  ft_strlen(l))))
 			break ;
 		ft_printf("Line was: %s\n", l);
 		ft_free(l, (void **)&l);
