@@ -40,6 +40,7 @@ typedef struct s_minishell
 	int				tkit;
 	int				tkstate;
 	char			*buffer;
+	char			*cmd_conv;
 	t_envmanager	evm;
 	t_workdirmgr	wdm;
 } t_minishell,	t_msh, t_mini;

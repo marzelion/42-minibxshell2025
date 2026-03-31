@@ -101,6 +101,7 @@ t_mini	*t_m_ctor(t_mini *x, char **envp, int k)
 	if (t_mini_default(x, FTPIPE(x->wdm.pd, 1, 0) != 0))
 		return (NULL);
 	x->history_path = NULL;
+	x->cmd_conv = NULL;
 	return (x);
 }
 

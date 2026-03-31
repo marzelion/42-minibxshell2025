@@ -556,6 +556,8 @@ void ft_strreplace(char **dst, const char *src)
 
 void *lexstate_any(t_mini *x, const char *t, t_pipex *ppx)
 {
+	char *tmp;
+
 	(void)ppx;
 	if (streq(t, "<"))
 		return lexstate_inredir;
@@ -566,7 +568,19 @@ void *lexstate_any(t_mini *x, const char *t, t_pipex *ppx)
 	else if (streq(t, ">>"))
 		return lexstate_appndredir;
 	//*c = ft_putstr_fd((char *)t, pf[1]);
-	x->tkit = 8;
+	tmp = x->cmd_conv;
+	x->cmd_conv = FT_JOIN(x->cmd_conv, t);
+	ft_free(tmp, (void **)&tmp);
+	if (!x->cmd_conv)
+		return (NULL);
+	tmp = x->cmd_conv;
+	x->cmd_conv = FT_JOIN(x->cmd_conv, " ");
+	ft_free(tmp, (void **)&tmp);
+	if (!x->cmd_conv)
+		return (NULL);
+	return (lexstate_any);
+}
+/*	x->tkit = 8;
 	while(x->tkit < 22)
 	{
 		if (streq(t, x->tokenset[x->tkit]))
@@ -577,22 +591,61 @@ void *lexstate_any(t_mini *x, const char *t, t_pipex *ppx)
 		}
 		x->tkit += 2;
 	}
-	return (lexstate_any);
-}
+*/
 
 void *lexstate_appndredir(t_mini *x, const char *winn_t, t_pipex *ppx)
 {
-	(void)x;
-	(void)winn_t;
-	(void)ppx;
+	char **tmp;
+	int mode;
+
+	tmp = NULL;
+    if (*x->tokenset[5] != '\0')
+    {
+        mode = O_WRONLY | O_CREAT | O_APPEND;
+        ppx->outfilefd = filex_prp(x->tokenset[5], &mode, 0644, NULL);
+		ppx->error = close(pipefd[0]);
+		tmp = &x->tokenset[5];
+    }
+    else if (*x->tokenset[7] != '\0')
+    {
+        mode = O_WRONLY | O_CREAT | O_APPEND;
+        ppx->outfilefd = filex_prp(x->tokenset[7], &mode, 0644, NULL);
+        ppx->error = close(fd);
+		tmp = &x->tokenset[7];
+    }	
+	x->tokenset[7] = ft_strdup(winn_t);
+	if (tmp)
+    	ft_free(tmp, (void **)&tmp);
+	if (!x->tokenset[5])
+		return (NULL);
 	return (lexstate_any);
 }
 
 void *lexstate_outredir(t_mini *x, const char *winn_t, t_pipex *ppx)
 {
-	(void)x;
-	(void)winn_t;
-	(void)ppx;
+	char **tmp;
+	int mode;
+
+	tmp = NULL;
+    if (*x->tokenset[7] != '\0')
+    {
+        mode = O_WRONLY | O_CREAT | O_APPEND;
+        ppx->outfilefd = filex_prp(x->tokenset[7], &mode, 0644, NULL);
+        ppx->error = close(fd);
+		tmp = &x->tokenset[5];
+    }
+    else if (*x->tokenset[5] != '\0')
+    {
+        mode = O_WRONLY | O_CREAT | O_TRUNC;//permiso para escribir, crear o truncar
+        ppx->outfilefd = filex_prp(x->tokenset[5], &mode, 0644, NULL);
+		ppx->error = close(pipefd[0]);
+		tmp = &x->tokenset[7];
+    }
+	x->tokenset[7] = ft_strdup(winn_t);
+	if (tmp)
+    	ft_free(tmp, (void **)&tmp);
+	if (!x->tokenset[7])
+		return (NULL);	
 	return (lexstate_any);
 }
 
@@ -659,14 +712,29 @@ void *lexstate_inredir(t_mini *x, const char *winn_t, t_pipex *ppx)
 
 void ft_pipex_cmdconv(t_mini *x, char **tokv, t_pipex *ppx)
 {
-	const char	*t;
-	t_lexstatefunc	st;
+	const char		*t;
+	t_lexstatefunc	st;	
 
 	st = lexstate_any;
+	if (x->cmd_conv)
+		ft_free(x->cmd_conv, (void **)&x->cmd_conv);
+	x->cmd_conv = ft_strdup("./pipex ");
+	if (!x->cmd_conv)
+		return ;
 	while(*(tokv++) && !errno)
 	{
 		t = *(tokv - 1);
 		st = (*st)(x, t, ppx);
+		/*if (st == lexstate_any && !is_op_token(t))
+        {
+            tmp = x->cmd_conv;
+            x->cmd_conv = FT_JOIN(x->cmd_conv, t);
+            ft_free(tmp, (void **)&tmp);
+
+            tmp = x->cmd_conv;
+            x->cmd_conv = FT_JOIN(x->cmd_conv, " ");
+            ft_free(tmp, (void **)&tmp);
+        }*/		
 		/*if (st == ST_ANY)
 		{ //"<outfile <outfile => outfile outfile ..."
 			if (streq(t, "<"))
@@ -688,9 +756,6 @@ void ft_pipex_cmdconv(t_mini *x, char **tokv, t_pipex *ppx)
 		else if (st == ST_EXPECT_OUTAPPEND)
 			st = ST_ANY;			*/
 	}
-	if (st != lexstate_any)
-		return ;
-	return ;
 }
 int ft_pipex_split_1(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
 {
@@ -718,6 +783,7 @@ int ft_pipex_split_1(t_mini *x, char **l, t_pipex *ppx, pid_t **pid)
 			ft_printf("%p~%s\n", p -1, *(p - 1));
 		}*/
 	}
+	ft_putendl(x->cmd_conv);
 	ft_free(out_norm, (void **)&out_norm);
 	return (t_pipex_dtor(ppx) + (ft_strsplit_release(&l) != NULL));
 }
